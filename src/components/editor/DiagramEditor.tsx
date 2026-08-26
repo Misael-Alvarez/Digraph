@@ -6,6 +6,7 @@ import { safeParseDiagramModel } from '@/lib/domain';
 import { EditorProvider, useEditor } from './EditorProvider';
 import { Canvas } from './canvas/Canvas';
 import { CodePanel } from './code/CodePanel';
+import { AiDialog } from './ai/AiDialog';
 import { CommandPalette } from './chrome/CommandPalette';
 import { InspectorPanel } from './chrome/InspectorPanel';
 import { Minimap } from './chrome/Minimap';
@@ -87,6 +88,7 @@ function EditorShell() {
 
       <CommandPalette />
       <Modals />
+      <AiDialog />
       <Toast />
       <CloudSwitchAnnouncer />
 

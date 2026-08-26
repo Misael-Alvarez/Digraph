@@ -190,6 +190,13 @@ export function useCommands(): CommandSet {
         run: () => dispatchUi({ type: 'toggleMinimap' }),
       },
       {
+        id: 'ai',
+        label: t('action.ai'),
+        icon: '✦',
+        shortcut: `${m}J`,
+        run: () => dispatchUi({ type: 'setModal', modal: 'ai' }),
+      },
+      {
         id: 'templates',
         label: t('action.templates'),
         icon: '▤',

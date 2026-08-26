@@ -1,36 +1,100 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AION Architecture Studio
 
-## Getting Started
+A cloud architecture diagram editor for developers. Draw on a canvas, or write
+the architecture as YAML and watch it draw itself — the two stay in sync.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The editor is at http://localhost:3000. Nothing else is required: diagrams live
+in the browser (IndexedDB) until the backend lands.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To enable the AI features, copy `.env.example` to `.env.local` and set
+`ANTHROPIC_API_KEY`. Without it everything else works and the AI panel says it
+is unavailable.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## What it does
 
-## Learn More
+- **189 cloud services** across AWS, Azure, GCP and generic infrastructure, with
+  the official icons.
+- **Switch cloud in one click.** Every service is mapped to its equivalent role
+  in the other providers, so an AWS diagram becomes a GCP one and anything with
+  no equivalent is reported rather than silently changed.
+- **Diagram as code.** A YAML DSL compiles to a diagram and back, losslessly,
+  positions included. Edit either side; whichever has focus wins.
+- **Generate with AI.** Describe a system and get a diagram, or ask what the one
+  on screen is missing. A generated diagram is one undo step away from gone.
+- **Export** to SVG, PNG, Markdown and Mermaid. Exported files are entirely
+  self-contained — icons and logos are inlined, so they render anywhere.
 
-To learn more about Next.js, take a look at the following resources:
+## Keyboard
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+|                |                                                        |
+| -------------- | ------------------------------------------------------ |
+| `⌘K`           | Command palette: services and commands                 |
+| `⌘J`           | AI assistant                                           |
+| `⌘/`           | Split code view                                        |
+| `V B U G I C`  | Select, boundary, sub-boundary, group, item, connector |
+| `Space` + drag | Pan · `⌘` + wheel zooms at the cursor                  |
+| `⌘1` / `⌘0`    | Fit to view / reset zoom                               |
+| `?`            | Every shortcut                                         |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## The DSL
 
-## Deploy on Vercel
+```yaml
+version: 1
+cloud: aws
+boundaries:
+  vpc: { label: Production VPC }
+nodes:
+  cdn: cloudfront
+  api: { service: apigateway, label: Public API, in: vpc }
+  fn: { service: lambda, in: vpc }
+edges:
+  - cdn -> api: HTTPS
+  - api -> fn: invoke
+layout:
+  cdn: [80, 80]
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`cloud` resolves unprefixed service names, so retargeting a whole diagram is a
+one-line change. `layout` is written by the canvas and pins manual positions;
+leave it out and the layered auto-layout decides.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Architecture
+
+```
+src/lib/domain/   Zod schemas — the single source of truth for every type
+src/lib/engine/   Pure geometry, routing, layout. No browser APIs, so it can
+                  render on a server for embeds.
+src/lib/dsl/      YAML and Mermaid, in and out
+src/lib/ai/       Prompts, output schema, rate limiting
+src/lib/store/    DiagramRepository — the only I/O boundary in the app
+src/lib/editor/   Reducer, viewport maths, export
+src/components/   The editor: canvas, floating chrome, code panel
+src/app/api/ai/   The only place the API key exists
+```
+
+Two rules hold the shape:
+
+**The UI never touches I/O.** Everything goes through `DiagramRepository`, which
+is async today over IndexedDB and will be the same interface over an API.
+
+**The engine never touches the browser.** That is what will let the same code
+render embed images on the server.
+
+## Commands
+
+```bash
+npm run dev          # development server
+npm run build        # production build
+npm test             # unit tests
+npm run test:e2e     # end-to-end tests (needs the dev server running)
+npm run typecheck    # tsc --noEmit
+npm run lint
+npm run format
+```

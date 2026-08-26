@@ -86,6 +86,10 @@ export function useKeyboard() {
             e.preventDefault();
             runCommand('toggleCode');
             return;
+          case 'j':
+            e.preventDefault();
+            runCommand('ai');
+            return;
           case '0':
             e.preventDefault();
             runCommand('zoomReset');
@@ -205,6 +209,7 @@ export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description
     items: [
       ['Mod+K', 'palette.placeholder'],
       ['Mod+/', 'action.toggleCode'],
+      ['Mod+J', 'action.ai'],
       ['Mod+S', 'action.save'],
       ['Mod+E', 'action.exportMarkdown'],
       ['Mod+0', 'action.zoomReset'],

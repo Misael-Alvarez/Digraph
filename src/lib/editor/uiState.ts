@@ -2,7 +2,7 @@ import type { Locale } from '@/lib/i18n/messages';
 import { DEFAULT_VIEWPORT, type Viewport } from './viewport';
 import type { BrandMode, ToolMode } from './types';
 
-export type ModalKind = 'templates' | 'markdown' | 'shortcuts' | 'switchCloud' | null;
+export type ModalKind = 'templates' | 'markdown' | 'shortcuts' | 'switchCloud' | 'ai' | null;
 
 export interface UiState {
   tool: ToolMode;
