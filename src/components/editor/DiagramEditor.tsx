@@ -14,6 +14,7 @@ import { InspectorPanel } from './chrome/InspectorPanel';
 import { Minimap } from './chrome/Minimap';
 import { Modals } from './chrome/Modals';
 import { StatusBar } from './chrome/StatusBar';
+import { ShareDialog } from './chrome/ShareDialog';
 import { ToolDock } from './chrome/ToolDock';
 import { TopBar } from './chrome/TopBar';
 import { VersionPanel } from './chrome/VersionPanel';
@@ -129,6 +130,7 @@ function EditorShell({
       <CommandPalette />
       <Modals />
       <AiDialog />
+      <ShareDialog />
       <Toast />
       <CloudSwitchAnnouncer />
 

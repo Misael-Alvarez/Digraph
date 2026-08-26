@@ -131,3 +131,22 @@ test('the code view survives a reload', async ({ page }) => {
   await page.waitForSelector('.canvas-surface');
   await expect(page.locator('.code-panel')).toBeVisible();
 });
+
+test('the code panel can be closed from inside itself', async ({ page }) => {
+  // The shortcut that opens a panel has to work from within it; the typing guard
+  // used to swallow it, so the editor could be opened but not closed.
+  await openCode(page);
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+/');
+  await expect(page.locator('.code-panel')).toHaveCount(0);
+});
+
+test('shortcuts still work after closing the code panel', async ({ page }) => {
+  await openCode(page);
+  await page.locator('.cm-content').click();
+  await page.keyboard.press('ControlOrMeta+/');
+  await expect(page.locator('.code-panel')).toHaveCount(0);
+
+  await page.keyboard.press('ControlOrMeta+j');
+  await expect(page.getByRole('dialog')).toBeVisible();
+});

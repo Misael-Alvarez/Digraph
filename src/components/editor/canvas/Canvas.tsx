@@ -267,6 +267,7 @@ export function Canvas() {
         onContextMenu={(e) => e.preventDefault()}
         role="application"
         aria-label={t('app.title')}
+        tabIndex={-1}
       >
         <Defs theme={theme} />
         {ui.gridSnap && (

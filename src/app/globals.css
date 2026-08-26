@@ -1716,3 +1716,75 @@ kbd {
 .save-status.is-pending {
   color: var(--text-secondary);
 }
+
+/* ── Sharing ─────────────────────────────────────────────── */
+
+.share-field + .share-field {
+  margin-top: var(--space-5);
+}
+
+.share-field-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.share-value {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--text-xs);
+}
+.share-value.is-block {
+  margin: 0;
+  max-height: 160px;
+  overflow: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+/* ── Shared read-only view ───────────────────────────────── */
+
+.shared-root {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.shared-surface {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+.shared-surface:active {
+  cursor: grabbing;
+}
+
+.shared-zoom {
+  position: absolute;
+  left: var(--space-4);
+  bottom: var(--space-4);
+}
+
+.shared-credit {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  padding: 6px var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  text-decoration: none;
+}
+.shared-credit:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}

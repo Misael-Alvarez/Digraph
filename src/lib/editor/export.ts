@@ -1,25 +1,7 @@
-import { renderToStaticMarkup } from 'react-dom/server';
-import { createElement } from 'react';
 import type { DiagramModel } from '@/lib/domain';
 import { exportToMarkdown } from '@/lib/engine';
-import {
-  DiagramDocument,
-  type DiagramDocumentProps,
-} from '@/components/editor/canvas/DiagramDocument';
-
-/**
- * Serialises a diagram to a standalone SVG document.
- *
- * The previous implementation cloned the live `<svg>` node out of the DOM, which
- * carried the editor's selection outlines and resize handles into the file.
- * Those elements were styled only in the stylesheet, so in the exported file
- * they fell back to a solid black fill and covered the diagram. Rendering the
- * model to markup instead means editor chrome is never present to begin with.
- */
-export function diagramToSvgString(options: DiagramDocumentProps): string {
-  const markup = renderToStaticMarkup(createElement(DiagramDocument, options));
-  return `<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n${markup}`;
-}
+import { diagramToSvgStringClient } from './renderSvgClient';
+import type { DiagramDocumentProps } from '@/components/editor/canvas/DiagramDocument';
 
 function triggerDownload(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -32,7 +14,10 @@ function triggerDownload(blob: Blob, filename: string): void {
 }
 
 export function downloadSvg(options: DiagramDocumentProps, filename = 'diagram.svg'): void {
-  triggerDownload(new Blob([diagramToSvgString(options)], { type: 'image/svg+xml' }), filename);
+  triggerDownload(
+    new Blob([diagramToSvgStringClient(options)], { type: 'image/svg+xml' }),
+    filename,
+  );
 }
 
 export interface PngOptions extends DiagramDocumentProps {
@@ -45,7 +30,7 @@ export async function downloadPng(
   { pixelRatio = 2, ...options }: PngOptions,
   filename = 'diagram.png',
 ): Promise<void> {
-  const svg = diagramToSvgString({ ...options, scale: pixelRatio });
+  const svg = diagramToSvgStringClient({ ...options, scale: pixelRatio });
   // A data URL keeps the image same-origin, so the canvas is never tainted.
   const encoded = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 

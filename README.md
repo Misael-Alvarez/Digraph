@@ -30,6 +30,10 @@ is unavailable.
   on screen is missing. A generated diagram is one undo step away from gone.
 - **Export** to SVG, PNG, Markdown and Mermaid. Exported files are entirely
   self-contained — icons and logos are inlined, so they render anywhere.
+- **Share a link.** The diagram travels compressed inside the URL, so a link
+  works with no account and no server holding your data. `/api/embed` renders it
+  to SVG server-side for embedding, and the README snippet is a Mermaid block,
+  which GitHub renders natively.
 
 ## Keyboard
 
@@ -73,10 +77,12 @@ src/lib/engine/   Pure geometry, routing, layout. No browser APIs, so it can
                   render on a server for embeds.
 src/lib/dsl/      YAML and Mermaid, in and out
 src/lib/ai/       Prompts, output schema, rate limiting
+src/lib/share/    Link codec and share/embed URLs
 src/lib/store/    DiagramRepository — the only I/O boundary in the app
 src/lib/editor/   Reducer, viewport maths, export
 src/components/   The editor: canvas, floating chrome, code panel
-src/app/api/ai/   The only place the API key exists
+src/app/api/      Route handlers: AI (the only place the API key exists) and
+                  the server-rendered embed
 ```
 
 Two rules hold the shape:
@@ -84,8 +90,9 @@ Two rules hold the shape:
 **The UI never touches I/O.** Everything goes through `DiagramRepository`, which
 is async today over IndexedDB and will be the same interface over an API.
 
-**The engine never touches the browser.** That is what will let the same code
-render embed images on the server.
+**The engine never touches the browser.** That is what lets `/api/embed` render
+an image with the same code the canvas draws with — no headless browser, and no
+way for an embed to drift from what the author saw.
 
 ## Commands
 

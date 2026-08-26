@@ -221,6 +221,13 @@ export function useCommands(): CommandSet {
         run: () => dispatchUi({ type: 'setModal', modal: 'markdown' }),
       },
       {
+        id: 'share',
+        label: t('action.share'),
+        icon: '⇪',
+        shortcut: `${m}⇧S`,
+        run: () => dispatchUi({ type: 'setModal', modal: 'share' }),
+      },
+      {
         id: 'exportSvg',
         label: t('action.exportSvg'),
         icon: '↥',

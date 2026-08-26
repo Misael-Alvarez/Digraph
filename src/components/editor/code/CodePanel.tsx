@@ -5,6 +5,7 @@ import { parseDsl, serializeDsl, toMermaid, type CloudPrefix, type Diagnostic } 
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
 import { CodeEditor } from './CodeEditor';
+import { useReturnFocusToCanvas } from '@/lib/editor/returnFocus';
 
 /** How long to wait after the last keystroke before compiling. */
 const COMPILE_DEBOUNCE_MS = 350;
@@ -24,6 +25,7 @@ type Format = 'dsl' | 'mermaid';
  * user's work away.
  */
 export function CodePanel() {
+  useReturnFocusToCanvas();
   const { doc, dispatch, dispatchUi, t } = useEditor();
   const [source, setSource] = useState(() => serializeDsl(doc.model));
   const [focused, setFocused] = useState(false);

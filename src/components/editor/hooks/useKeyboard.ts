@@ -36,11 +36,39 @@ export function useKeyboard() {
       const modifier = e.metaKey || e.ctrlKey;
       const key = e.key.toLowerCase();
 
-      // The palette must open from anywhere, including a focused text field.
-      if (modifier && key === 'k') {
-        e.preventDefault();
-        dispatchUi({ type: 'setPaletteOpen', open: !ui.paletteOpen });
-        return;
+      /*
+       * Application shortcuts, handled before the typing guard below.
+       *
+       * These have no meaning inside a text field, and a panel's own toggle has
+       * to work from inside that panel — otherwise the code editor can be opened
+       * with a shortcut but not closed with one.
+       */
+      if (modifier) {
+        switch (key) {
+          case 'k':
+            e.preventDefault();
+            dispatchUi({ type: 'setPaletteOpen', open: !ui.paletteOpen });
+            return;
+          case '/':
+            e.preventDefault();
+            runCommand('toggleCode');
+            return;
+          case 'j':
+            e.preventDefault();
+            runCommand('ai');
+            return;
+          case 's':
+            // Without this the browser's own save dialog opens.
+            e.preventDefault();
+            runCommand(e.shiftKey ? 'share' : 'saveProject');
+            return;
+          case 'e':
+            e.preventDefault();
+            runCommand('exportMarkdown');
+            return;
+          default:
+            break;
+        }
       }
 
       if (e.key === 'Escape') {
@@ -69,26 +97,9 @@ export function useKeyboard() {
             e.preventDefault();
             runCommand(e.shiftKey ? 'deselect' : 'selectAll');
             return;
-          case 's':
-            // Without this the browser's own save dialog opens.
-            e.preventDefault();
-            runCommand('saveProject');
-            return;
-          case 'e':
-            e.preventDefault();
-            runCommand('exportMarkdown');
-            return;
           case 'd':
             e.preventDefault();
             runCommand('duplicate');
-            return;
-          case '/':
-            e.preventDefault();
-            runCommand('toggleCode');
-            return;
-          case 'j':
-            e.preventDefault();
-            runCommand('ai');
             return;
           case '0':
             e.preventDefault();
@@ -211,6 +222,7 @@ export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description
       ['Mod+/', 'action.toggleCode'],
       ['Mod+J', 'action.ai'],
       ['Mod+S', 'action.save'],
+      ['Mod+Shift+S', 'action.share'],
       ['Mod+E', 'action.exportMarkdown'],
       ['Mod+0', 'action.zoomReset'],
       ['Mod+1', 'action.zoomFit'],

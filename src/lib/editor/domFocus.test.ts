@@ -34,3 +34,27 @@ describe('isTextEntryTarget', () => {
     expect(isTextEntryTarget(null)).toBe(false);
   });
 });
+
+describe('detached elements', () => {
+  it('does not treat a removed field as somewhere the user is typing', () => {
+    // Closing a side panel leaves focus on its removed node; treating that as
+    // typing silently disabled every keyboard shortcut in the app.
+    const detached = {
+      tagName: 'DIV',
+      isContentEditable: true,
+      isConnected: false,
+      closest: () => ({}),
+    } as unknown as EventTarget;
+    expect(isTextEntryTarget(detached)).toBe(false);
+  });
+
+  it('still recognises a live field', () => {
+    const live = {
+      tagName: 'INPUT',
+      isContentEditable: false,
+      isConnected: true,
+      closest: () => null,
+    } as unknown as EventTarget;
+    expect(isTextEntryTarget(live)).toBe(true);
+  });
+});

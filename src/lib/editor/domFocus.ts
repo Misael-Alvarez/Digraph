@@ -9,6 +9,10 @@
 export function isTextEntryTarget(target: EventTarget | null): boolean {
   const element = target as HTMLElement | null;
   if (!element) return false;
+  // A detached node cannot be receiving typing. Focus can be left pointing at
+  // one after a panel closes, and treating that as "the user is typing" silently
+  // disables every shortcut in the app.
+  if (element.isConnected === false) return false;
   return (
     element.tagName === 'INPUT' ||
     element.tagName === 'TEXTAREA' ||

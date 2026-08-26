@@ -8,6 +8,7 @@ import { renderThumbnail } from '@/lib/store/thumbnail';
 import { useRepository } from '@/components/app/RepositoryProvider';
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
+import { useReturnFocusToCanvas } from '@/lib/editor/returnFocus';
 
 interface VersionPanelProps {
   onSnapshot: (model: DiagramModel) => void;
@@ -22,6 +23,7 @@ interface VersionPanelProps {
  * was written, rather than the panel guessing at the new state.
  */
 export function VersionPanel({ onSnapshot, onRestored }: VersionPanelProps) {
+  useReturnFocusToCanvas();
   const repository = useRepository();
   const { doc, dispatch, dispatchUi, ui, t } = useEditor();
   const params = useParams<{ id: string }>();
