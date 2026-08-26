@@ -1,4 +1,4 @@
-import { SVG_ICON_DEFS } from '@/components/icons/svgIconDefs';
+import { spriteFor } from '@/components/icons/svgIconDefs';
 import type { CanvasTheme } from '@/lib/design/tokens';
 
 /**
@@ -9,10 +9,20 @@ import type { CanvasTheme } from '@/lib/design/tokens';
  * define one — the previous editor appended a second marker with the same id,
  * leaving which arrowhead won up to document order.
  */
-export function Defs({ theme, idPrefix = '' }: { theme: CanvasTheme; idPrefix?: string }) {
+export function Defs({
+  theme,
+  idPrefix = '',
+  iconKeys,
+}: {
+  theme: CanvasTheme;
+  idPrefix?: string;
+  /** Only these service symbols are emitted. The full set is ~300KB, and it is
+   *  inlined into every exported file and every embed image. */
+  iconKeys: Iterable<string>;
+}) {
   return (
     <defs>
-      <g dangerouslySetInnerHTML={{ __html: SVG_ICON_DEFS }} />
+      <g dangerouslySetInnerHTML={{ __html: spriteFor(iconKeys) }} />
       <marker
         id={`${idPrefix}arrowhead`}
         viewBox="0 0 10 10"

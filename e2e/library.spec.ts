@@ -47,7 +47,7 @@ test('persists work across a reload', async ({ page }) => {
   await page.getByRole('button', { name: 'Nuevo diagrama' }).click();
   await page.locator('.dialog .template-card').filter({ hasText: 'Lienzo en blanco' }).click();
   await page.waitForSelector('.canvas-surface');
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 400, y: 300 } });
 
   // The status must admit the change is not written yet, then confirm it is.

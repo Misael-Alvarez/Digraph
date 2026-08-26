@@ -16,7 +16,7 @@ export const ShapeTypeSchema = z.enum(['boundary', 'group', 'container', 'item']
 export const BoundaryVariantSchema = z.enum(['outer', 'sub']);
 export const ConnectorStyleSchema = z.enum(['solid', 'dashed']);
 export const StackedGapSchema = z.enum(['tight', 'wide']);
-export const CloudProviderSchema = z.enum(['aws', 'azure', 'gcp', 'aion', 'generic']);
+export const CloudProviderSchema = z.enum(['aws', 'azure', 'gcp', 'oci', 'ibm', 'aion', 'generic']);
 
 export const IconRefSchema = z.object({
   kind: z.enum(['symbol', 'logo']),

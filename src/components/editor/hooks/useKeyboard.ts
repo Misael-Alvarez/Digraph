@@ -57,6 +57,10 @@ export function useKeyboard() {
             e.preventDefault();
             runCommand('ai');
             return;
+          case 'b':
+            e.preventDefault();
+            runCommand('toggleBrowser');
+            return;
           case 's':
             // Without this the browser's own save dialog opens.
             e.preventDefault();
@@ -219,6 +223,7 @@ export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description
     title: 'File & view',
     items: [
       ['Mod+K', 'palette.placeholder'],
+      ['Mod+B', 'action.browser'],
       ['Mod+/', 'action.toggleCode'],
       ['Mod+J', 'action.ai'],
       ['Mod+S', 'action.save'],

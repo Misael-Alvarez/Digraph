@@ -14,6 +14,7 @@ import { InspectorPanel } from './chrome/InspectorPanel';
 import { Minimap } from './chrome/Minimap';
 import { Modals } from './chrome/Modals';
 import { StatusBar } from './chrome/StatusBar';
+import { ServiceBrowser } from './chrome/ServiceBrowser';
 import { ShareDialog } from './chrome/ShareDialog';
 import { ToolDock } from './chrome/ToolDock';
 import { TopBar } from './chrome/TopBar';
@@ -79,14 +80,13 @@ function CloudSwitchAnnouncer() {
  */
 function Autosave({ onChange }: { onChange: (model: DiagramModel) => void }) {
   const { doc } = useEditor();
-  const first = useRef(true);
+  // Compared by identity rather than counting renders: a "skip the first one"
+  // flag is consumed by StrictMode's double-invoked effect, which made every
+  // freshly opened diagram report unsaved changes it did not have.
+  const loaded = useRef(doc.model);
 
   useEffect(() => {
-    // The model that arrived from storage does not need writing back.
-    if (first.current) {
-      first.current = false;
-      return;
-    }
+    if (doc.model === loaded.current) return;
     onChange(doc.model);
   }, [doc.model, onChange]);
 
@@ -115,6 +115,7 @@ function EditorShell({
     <div className="editor-root">
       <TopBar title={title} status={status} onRename={onRename} />
       <div className="editor-split">
+        {ui.browserOpen && <ServiceBrowser />}
         <main className="editor-stage">
           <Canvas />
           <ToolDock />

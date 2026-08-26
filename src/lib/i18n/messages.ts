@@ -64,6 +64,14 @@ const en = {
   'palette.commands': 'Commands',
   'palette.empty': 'No matches',
 
+  'browser.title': 'Services',
+  'browser.search': 'Filter services…',
+  'browser.empty': 'Nothing matches that.',
+  'browser.count': '{count} services',
+  'browser.allClouds': 'All',
+  'browser.hint': 'Drag onto the canvas, or click to place it.',
+  'action.browser': 'Browse services',
+
   'inspector.title': 'Properties',
   'inspector.empty': 'Select a shape to edit it',
   'inspector.multi': '{count} shapes selected',
@@ -220,6 +228,14 @@ const es: Record<MessageKey, string> = {
   'palette.services': 'Servicios',
   'palette.commands': 'Comandos',
   'palette.empty': 'Sin resultados',
+
+  'browser.title': 'Servicios',
+  'browser.search': 'Filtrar servicios…',
+  'browser.empty': 'Nada coincide.',
+  'browser.count': '{count} servicios',
+  'browser.allClouds': 'Todas',
+  'browser.hint': 'Arrastra al lienzo, o haz clic para colocarlo.',
+  'action.browser': 'Explorar servicios',
 
   'inspector.title': 'Propiedades',
   'inspector.empty': 'Selecciona una forma para editarla',

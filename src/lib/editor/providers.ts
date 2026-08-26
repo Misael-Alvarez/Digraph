@@ -54,6 +54,22 @@ export const PROVIDER_COLORS: Record<string, ProviderPalette> = {
     body: '#f5ecfd',
     headerText: '#ffffff',
   },
+  oci: {
+    border: providerColors.oci,
+    fill: '#fdf1ef',
+    header: providerColors.oci,
+    subHeader: '#d9695a',
+    body: '#fcf3f1',
+    headerText: '#ffffff',
+  },
+  ibm: {
+    border: providerColors.ibm,
+    fill: '#eef3ff',
+    header: providerColors.ibm,
+    subHeader: '#4589ff',
+    body: '#eff4ff',
+    headerText: '#ffffff',
+  },
   generic: {
     border: providerColors.generic,
     fill: '#f8f9fa',
@@ -71,6 +87,17 @@ export function providerOf(iconKey: string | undefined): string {
   if (prefix === 'az') return 'azure';
   return prefix in PROVIDER_COLORS ? prefix : 'generic';
 }
+
+/** Cloud prefix used in service keys, per cloud id. */
+export const CLOUD_KEY_PREFIX: Record<string, string> = {
+  aws: 'aws-',
+  azure: 'az-',
+  gcp: 'gcp-',
+  oci: 'oci-',
+  ibm: 'ibm-',
+  aion: 'aion-',
+  generic: 'gen-',
+};
 
 export function paletteFor(iconKey: string | undefined): ProviderPalette {
   return PROVIDER_COLORS[providerOf(iconKey)];

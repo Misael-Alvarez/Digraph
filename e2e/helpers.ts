@@ -35,3 +35,9 @@ export async function pagePoint(page: Page, x: number, y: number) {
   const box = await page.locator('.canvas-surface').boundingBox();
   return { x: (box?.x ?? 0) + x, y: (box?.y ?? 0) + y };
 }
+
+/** Places a service group at a point in canvas-element coordinates. */
+export async function addGroupAt(page: Page, x: number, y: number) {
+  await page.locator('[data-tool="group"]').click();
+  await page.locator('.canvas-surface').click({ position: { x, y } });
+}

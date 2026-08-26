@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import type { DiagramModel } from '@/lib/domain';
-import { contentBBox, routeAllConnectors } from '@/lib/engine';
+import { iconKeysIn, contentBBox, routeAllConnectors } from '@/lib/engine';
 import { canvasTheme } from '@/lib/design/tokens';
 import { fitToBox, pan, viewportTransform, zoomAt, type Viewport } from '@/lib/editor/viewport';
 import { safeDecodeDiagram } from '@/lib/share/codec';
@@ -136,7 +136,7 @@ export function SharedDiagram() {
           dragging.current = { x: e.clientX, y: e.clientY, viewport };
         }}
       >
-        <Defs theme={theme} />
+        <Defs theme={theme} iconKeys={iconKeysIn(model)} />
         <g transform={viewportTransform(viewport)}>
           <DiagramScene model={model} theme={theme} />
         </g>

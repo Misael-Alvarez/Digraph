@@ -19,8 +19,9 @@ is unavailable.
 
 ## What it does
 
-- **189 cloud services** across AWS, Azure, GCP and generic infrastructure, with
-  the official icons.
+- **572 cloud services** across AWS, Azure, Google Cloud, Oracle Cloud, IBM
+  Cloud and generic infrastructure, browsable by provider and by functional area
+  rather than as one long list.
 - **Switch cloud in one click.** Every service is mapped to its equivalent role
   in the other providers, so an AWS diagram becomes a GCP one and anything with
   no equivalent is reported rather than silently changed.
@@ -68,6 +69,27 @@ layout:
 `cloud` resolves unprefixed service names, so retargeting a whole diagram is a
 one-line change. `layout` is written by the canvas and pins manual positions;
 leave it out and the layered auto-layout decides.
+
+## The service catalogue
+
+The catalogue and the cross-cloud equivalence table are generated from a master
+list of cloud services:
+
+```bash
+node scripts/buildData.mjs  path/to/cloud-services-master-list.md
+node scripts/buildIcons.mjs path/to/cloud-services-master-list.md
+```
+
+Both read their baseline from the last commit rather than the working tree, so
+re-running cannot feed on its own output. Nothing is ever removed: stored
+diagrams reference service keys, so the build is a union of what the app already
+has and what the list adds.
+
+Icons come from three places, in order: the symbols the app already shipped, the
+official AWS architecture icon set, and — for Azure, Google Cloud, Oracle and
+IBM, where no equivalent artwork is redistributable — a generated mark carrying
+the provider's colour and the service's category, drawn in the same idiom as the
+official ones.
 
 ## Architecture
 

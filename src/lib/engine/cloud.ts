@@ -4,7 +4,13 @@ import { SERVICE_ICONS } from '@/data/serviceIcons';
 import { getShape } from './model';
 import { routeAllConnectors } from './routing';
 
-const PREFIX: Record<CloudTarget, string> = { aws: 'aws-', azure: 'az-', gcp: 'gcp-' };
+const PREFIX: Record<CloudTarget, string> = {
+  aws: 'aws-',
+  azure: 'az-',
+  gcp: 'gcp-',
+  oci: 'oci-',
+  ibm: 'ibm-',
+};
 
 /** Services with no cloud identity of their own are never rewritten. */
 function isCloudNeutral(key: string): boolean {

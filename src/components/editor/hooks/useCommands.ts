@@ -184,6 +184,13 @@ export function useCommands(): CommandSet {
         run: () => dispatchUi({ type: 'toggleCode' }),
       },
       {
+        id: 'toggleBrowser',
+        label: t('action.browser'),
+        icon: '▦',
+        shortcut: `${m}B`,
+        run: () => dispatchUi({ type: 'toggleBrowser' }),
+      },
+      {
         id: 'toggleVersions',
         label: t('versions.title'),
         icon: '⏱',

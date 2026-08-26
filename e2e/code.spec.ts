@@ -61,7 +61,7 @@ test('the canvas drives the code once the editor loses focus', async ({ page }) 
   await expect(page.locator('[data-shape-id^="grp_"]')).toHaveCount(1);
 
   // Move focus out of the editor, then add a shape from the canvas side.
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 700, y: 420 } });
 
   await expect.poll(() => codeText(page)).toContain('New Item');
@@ -87,7 +87,7 @@ test('keeps broken source instead of overwriting it from the model', async ({ pa
   await expect(page.locator('.code-badge.is-error')).toBeVisible();
 
   // Editing the canvas must not silently discard what the user is fixing.
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 700, y: 420 } });
   await expect.poll(() => codeText(page)).toContain('unclosed');
 });

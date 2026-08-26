@@ -9,7 +9,7 @@ async function openHistory(page: import('@playwright/test').Page) {
 }
 
 async function addGroup(page: import('@playwright/test').Page, x: number, y: number) {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x, y } });
 }
 

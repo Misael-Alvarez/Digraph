@@ -1,6 +1,6 @@
 import type { DiagramModel } from '@/lib/domain';
 import { canvasTheme, fontSize, fontWeight, providerColors } from '@/lib/design/tokens';
-import { contentBBox } from '@/lib/engine';
+import { iconKeysIn, contentBBox } from '@/lib/engine';
 import { AION_LOGO } from '@/data/aionLogo';
 import { BANORTE_LOGO } from '@/data/banorteLogo';
 import type { BrandMode } from '@/lib/editor';
@@ -49,7 +49,7 @@ export function DiagramDocument({
       height={Math.round(height * scale)}
       fontFamily="-apple-system, 'Segoe UI', Roboto, Arial, sans-serif"
     >
-      <Defs theme={theme} />
+      <Defs theme={theme} iconKeys={iconKeysIn(model)} />
       <rect x={originX} y={originY} width={width} height={height} fill={theme.sheet} />
       <DiagramScene model={model} theme={theme} />
       {showFooter && (

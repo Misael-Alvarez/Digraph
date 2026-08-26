@@ -4,6 +4,7 @@ import type { ToolMode } from '@/lib/editor';
 import type { MessageKey } from '@/lib/i18n/messages';
 import { useEditor } from '../EditorProvider';
 import {
+  LayoutIcon,
   BoundaryIcon,
   ConnectorIcon,
   GroupIcon,
@@ -39,12 +40,27 @@ export function ToolDock() {
       aria-orientation="vertical"
       aria-label={t('app.title')}
     >
+      <button
+        type="button"
+        data-tool="browser"
+        className={`tool-button${ui.browserOpen ? ' is-active' : ''}`}
+        aria-pressed={ui.browserOpen}
+        onClick={() => dispatchUi({ type: 'toggleBrowser' })}
+      >
+        <LayoutIcon size={18} />
+        <span className="tool-tooltip" role="tooltip">
+          {t('action.browser')}
+          <kbd>⌘B</kbd>
+        </span>
+      </button>
+      <span className="tool-dock-divider" />
       {TOOLS.map(({ mode, labelKey, shortcut, Icon }) => {
         const active = ui.tool === mode;
         return (
           <button
             key={mode}
             type="button"
+            data-tool={mode}
             className={`tool-button${active ? ' is-active' : ''}`}
             aria-pressed={active}
             aria-keyshortcuts={shortcut}

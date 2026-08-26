@@ -6,15 +6,23 @@ const PREFIX: Record<CloudPrefix, string> = { aws: 'aws-', azure: 'az-', gcp: 'g
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-/** Every way a service can be written, mapped to its canonical key. */
+/**
+ * Every way a service can be written, mapped to its canonical key.
+ *
+ * First write wins, and the catalogue is ordered by cloud, so an ambiguous name
+ * such as "API Gateway" — which four clouds use — resolves to the same service
+ * every time instead of whichever happened to be listed last.
+ */
 const BY_ALIAS = new Map<string, string>();
+const alias = (name: string, key: string) => {
+  if (name && !BY_ALIAS.has(name)) BY_ALIAS.set(name, key);
+};
 for (const service of SERVICE_ICONS) {
   BY_ALIAS.set(service.key, service.key);
-  BY_ALIAS.set(slug(service.key), service.key);
-  BY_ALIAS.set(slug(service.label), service.key);
+  alias(slug(service.key), service.key);
+  alias(slug(service.label), service.key);
   // Bare name without the cloud prefix, e.g. `lambda` for `aws-lambda`.
-  const bare = service.key.replace(/^(aws|az|gcp|gen|aion)-/, '');
-  if (!BY_ALIAS.has(bare)) BY_ALIAS.set(bare, service.key);
+  alias(service.key.replace(/^(aws|az|gcp|oci|ibm|gen|aion)-/, ''), service.key);
 }
 
 /**
@@ -59,12 +67,26 @@ const TOKENS = (s: string) =>
     .split(/[^a-z0-9]+/i)
     .filter(Boolean);
 
-/** Every service's label reduced to tokens, longest label first. */
+/**
+ * Cloud preference used to break a tie.
+ *
+ * Several clouds offer a service under the same name — "API Gateway" exists in
+ * four of them — so with no hint the answer has to be deterministic rather than
+ * whichever happened to sort first.
+ */
+const CLOUD_RANK = ['aws-', 'az-', 'gcp-', 'oci-', 'ibm-', 'gen-', 'aion-'];
+
+const rankOf = (key: string) => {
+  const index = CLOUD_RANK.findIndex((prefix) => key.startsWith(prefix));
+  return index === -1 ? CLOUD_RANK.length : index;
+};
+
+/** Every service's label reduced to tokens, most specific label first. */
 const LABEL_TOKENS = SERVICE_ICONS.map((service) => ({
   key: service.key,
   tokens: TOKENS(service.label),
   weight: service.label.length,
-})).sort((a, b) => b.weight - a.weight);
+})).sort((a, b) => b.weight - a.weight || rankOf(a.key) - rankOf(b.key));
 
 /**
  * Loose match of a human-written label to a service.
@@ -92,7 +114,11 @@ export function matchServiceLabel(text: string, cloud?: CloudPrefix): string | n
     const preferred = matches.find((m) => m.key.startsWith(PREFIX[cloud]));
     if (preferred) return preferred.key;
   }
-  return matches[0].key;
+
+  // No hint: take the most specific label, and among equals the earliest cloud.
+  const best = matches[0].weight;
+  return matches.filter((m) => m.weight === best).sort((a, b) => rankOf(a.key) - rankOf(b.key))[0]
+    .key;
 }
 
 /** Completion candidates for the code editor. */

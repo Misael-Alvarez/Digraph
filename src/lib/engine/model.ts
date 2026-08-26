@@ -61,6 +61,15 @@ export function collectDescendantIds(model: DiagramModel, rootId: string): Set<s
   return set;
 }
 
+/** Every service symbol a diagram references, for building a minimal sprite. */
+export function iconKeysIn(model: DiagramModel): string[] {
+  const keys = new Set<string>();
+  for (const shape of model.shapes) {
+    if (shape.icon?.kind === 'symbol') keys.add(shape.icon.key);
+  }
+  return [...keys];
+}
+
 export function createEmptyModel(): DiagramModel {
   return {
     schemaVersion: CURRENT_SCHEMA_VERSION,

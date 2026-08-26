@@ -85,6 +85,7 @@ describe('preferences', () => {
       locale: 'es',
       minimapOpen: true,
       codeOpen: false,
+      browserOpen: false,
     });
     expect('tool' in prefs).toBe(false);
   });

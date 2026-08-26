@@ -22,6 +22,8 @@ export interface UiState {
   codeOpen: boolean;
   /** Version history panel. */
   versionsOpen: boolean;
+  /** Service browser drawer. */
+  browserOpen: boolean;
   inspectorPinned: boolean;
   modal: ModalKind;
   toast: string | null;
@@ -41,6 +43,7 @@ export const initialUiState: UiState = {
   paletteOpen: false,
   codeOpen: false,
   versionsOpen: false,
+  browserOpen: false,
   inspectorPinned: false,
   modal: null,
   toast: null,
@@ -61,6 +64,7 @@ export type UiAction =
   | { type: 'toggleMinimap' }
   | { type: 'toggleCode' }
   | { type: 'toggleVersions' }
+  | { type: 'toggleBrowser' }
   | { type: 'setPaletteOpen'; open: boolean }
   | { type: 'toggleInspectorPinned' }
   | { type: 'setModal'; modal: ModalKind }
@@ -120,6 +124,9 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
     case 'toggleVersions':
       return { ...state, versionsOpen: !state.versionsOpen, codeOpen: false };
 
+    case 'toggleBrowser':
+      return { ...state, browserOpen: !state.browserOpen };
+
     case 'setPaletteOpen':
       return { ...state, paletteOpen: action.open };
 
@@ -145,6 +152,7 @@ export interface StoredPreferences {
   locale: Locale;
   minimapOpen: boolean;
   codeOpen: boolean;
+  browserOpen: boolean;
 }
 
 export const PREFERENCES_KEY = 'aion-studio-preferences';
@@ -167,5 +175,6 @@ export function toPreferences(state: UiState): StoredPreferences {
     locale: state.locale,
     minimapOpen: state.minimapOpen,
     codeOpen: state.codeOpen,
+    browserOpen: state.browserOpen,
   };
 }

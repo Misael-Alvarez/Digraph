@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SERVICE_ICONS, CATEGORY_LABELS } from '@/data/serviceIcons';
-import { SVG_ICON_DEFS } from '@/components/icons/svgIconDefs';
+import { ALL_SYMBOLS } from '@/components/icons/svgIconDefs';
 import { scoreMatch } from '@/lib/editor/search';
 import { useEditor } from '../EditorProvider';
 import { useCommands, type Command } from '../hooks/useCommands';
@@ -190,7 +190,7 @@ function PaletteContents() {
       {/* The palette renders above the canvas in a portal-like overlay, so it
           needs its own copy of the sprite for <use href="#i-..."> to resolve. */}
       <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
-        <defs dangerouslySetInnerHTML={{ __html: SVG_ICON_DEFS }} />
+        <defs dangerouslySetInnerHTML={{ __html: ALL_SYMBOLS }} />
       </svg>
     </div>
   );

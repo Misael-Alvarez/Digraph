@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Shape } from '@/lib/domain';
 import * as E from '@/lib/engine';
+import { iconKeysIn } from '@/lib/engine';
 import { canvasTheme } from '@/lib/design/tokens';
 import { SERVICE_ICONS } from '@/data/serviceIcons';
 import { toCanvas, viewportTransform, visibleBox, zoomAt } from '@/lib/editor/viewport';
@@ -269,7 +270,7 @@ export function Canvas() {
         aria-label={t('app.title')}
         tabIndex={-1}
       >
-        <Defs theme={theme} />
+        <Defs theme={theme} iconKeys={iconKeysIn(model)} />
         {ui.gridSnap && (
           <>
             <pattern

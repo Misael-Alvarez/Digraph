@@ -180,6 +180,8 @@ export const providerColors = {
   aws: '#ff9900',
   azure: '#0078d4',
   gcp: '#4285f4',
+  oci: '#c74634',
+  ibm: '#0f62fe',
   aion: '#6b2fa0',
   banorte: '#ce0032',
   generic: '#9aa0a6',

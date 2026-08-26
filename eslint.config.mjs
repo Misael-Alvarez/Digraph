@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // One-off Node scripts that regenerate the icon sprite; not app code.
     "coverage/**",
+    // One-off generators run by hand, not part of the app bundle.
+    "scripts/**",
     "generate-icons.js",
     "*.py",
   ]),

@@ -31,7 +31,7 @@ test('renders the canvas-first chrome', async ({ page }) => {
 });
 
 test('places a group from the tool dock', async ({ page }) => {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 500, y: 300 } });
 
   await expect(page.locator('.empty-state')).toHaveCount(0);
@@ -39,7 +39,7 @@ test('places a group from the tool dock', async ({ page }) => {
 });
 
 test('undo restores the exact position after a drag', async ({ page }) => {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 400, y: 300 } });
   await page.locator('.canvas-surface').click({ position: { x: 420, y: 320 } });
   await expect(page.locator('.inspector')).toBeVisible();
@@ -99,7 +99,7 @@ test('zooms at the cursor with ctrl+wheel', async ({ page }) => {
 });
 
 test('selection opens the contextual inspector and edits the title', async ({ page }) => {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 500, y: 300 } });
   await page.locator('.canvas-surface').click({ position: { x: 520, y: 320 } });
 
@@ -109,7 +109,7 @@ test('selection opens the contextual inspector and edits the title', async ({ pa
 });
 
 test('Delete removes the selection, but not while typing in a field', async ({ page }) => {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 500, y: 300 } });
   await page.locator('.canvas-surface').click({ position: { x: 520, y: 320 } });
   await expect(page.locator('.inspector')).toBeVisible();
@@ -136,7 +136,7 @@ test('toggles dark mode and keeps it across a reload', async ({ page }) => {
 });
 
 test('reports no console or page errors', async ({ page }) => {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 500, y: 300 } });
   await page.keyboard.press('ControlOrMeta+k');
   await page.keyboard.press('Escape');
@@ -146,7 +146,7 @@ test('reports no console or page errors', async ({ page }) => {
 });
 
 test('double-click focuses the title field for quick renaming', async ({ page }) => {
-  await page.locator('.tool-button').nth(3).click();
+  await page.locator('[data-tool="group"]').click();
   await page.locator('.canvas-surface').click({ position: { x: 500, y: 300 } });
 
   const shape = await pagePoint(page, 520, 320);
