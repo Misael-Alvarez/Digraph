@@ -13,6 +13,8 @@ import type { CloudTarget } from '@/data/cloudEquivalents';
 export type EditorAction =
   /** Replaces the document wholesale and clears history (open, template, import). */
   | { type: 'load'; model: DiagramModel }
+  /** Replaces the content but keeps history, so a code edit stays undoable. */
+  | { type: 'replaceModel'; model: DiagramModel }
   | { type: 'addBoundary'; x: number; y: number; variant: 'outer' | 'sub' }
   | {
       type: 'addGroup';

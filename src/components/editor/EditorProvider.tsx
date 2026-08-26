@@ -69,6 +69,9 @@ export function EditorProvider({
     if (stored.minimapOpen !== undefined && stored.minimapOpen !== initialUiState.minimapOpen) {
       dispatchUi({ type: 'toggleMinimap' });
     }
+    if (stored.codeOpen !== undefined && stored.codeOpen !== initialUiState.codeOpen) {
+      dispatchUi({ type: 'toggleCode' });
+    }
     if (stored.brand) dispatchUi({ type: 'setBrand', brand: stored.brand });
     if (stored.locale) dispatchUi({ type: 'setLocale', locale: stored.locale });
   }, []);

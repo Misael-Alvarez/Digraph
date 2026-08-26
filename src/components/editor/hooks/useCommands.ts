@@ -177,6 +177,13 @@ export function useCommands(): CommandSet {
         run: () => dispatchUi({ type: 'toggleGridSnap' }),
       },
       {
+        id: 'toggleCode',
+        label: t('action.toggleCode'),
+        icon: '{ }',
+        shortcut: `${m}/`,
+        run: () => dispatchUi({ type: 'toggleCode' }),
+      },
+      {
         id: 'toggleMinimap',
         label: t('action.toggleMinimap'),
         icon: '🗺',

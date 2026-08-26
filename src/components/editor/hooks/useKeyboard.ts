@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { cloneShapes } from '@/lib/engine';
 import type { ToolMode } from '@/lib/editor';
+import { isTextEntryTarget } from '@/lib/editor/domFocus';
 import { useEditor } from '../EditorProvider';
 import { useCommands } from './useCommands';
 
@@ -15,18 +16,6 @@ const TOOL_KEYS: Record<string, ToolMode> = {
   c: 'connector',
   h: 'pan',
 };
-
-/** True when the event came from somewhere the user is typing. */
-function isTypingTarget(target: EventTarget | null): boolean {
-  const el = target as HTMLElement | null;
-  if (!el) return false;
-  return (
-    el.tagName === 'INPUT' ||
-    el.tagName === 'TEXTAREA' ||
-    el.tagName === 'SELECT' ||
-    el.isContentEditable
-  );
-}
 
 /**
  * Global shortcuts.
@@ -64,7 +53,7 @@ export function useKeyboard() {
         return;
       }
 
-      if (isTypingTarget(e.target)) return;
+      if (isTextEntryTarget(e.target)) return;
 
       if (modifier) {
         switch (key) {
@@ -92,6 +81,10 @@ export function useKeyboard() {
           case 'd':
             e.preventDefault();
             runCommand('duplicate');
+            return;
+          case '/':
+            e.preventDefault();
+            runCommand('toggleCode');
             return;
           case '0':
             e.preventDefault();
@@ -211,6 +204,7 @@ export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description
     title: 'File & view',
     items: [
       ['Mod+K', 'palette.placeholder'],
+      ['Mod+/', 'action.toggleCode'],
       ['Mod+S', 'action.save'],
       ['Mod+E', 'action.exportMarkdown'],
       ['Mod+0', 'action.zoomReset'],

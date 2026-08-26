@@ -6,6 +6,7 @@ import * as E from '@/lib/engine';
 import { canvasTheme } from '@/lib/design/tokens';
 import { SERVICE_ICONS } from '@/data/serviceIcons';
 import { toCanvas, viewportTransform, visibleBox, zoomAt } from '@/lib/editor/viewport';
+import { isTextEntryTarget } from '@/lib/editor/domFocus';
 import { useEditor } from '../EditorProvider';
 import { usePointerTools } from '../hooks/usePointerTools';
 import { Defs } from './Defs';
@@ -55,8 +56,9 @@ export function Canvas() {
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.code !== 'Space') return;
-      const tag = (e.target as HTMLElement | null)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      // Never swallow a space the user is typing — the code editor is a
+      // contenteditable, so a tag-name check alone would break it.
+      if (isTextEntryTarget(e.target)) return;
       e.preventDefault();
       setSpaceHeld(true);
     };

@@ -17,6 +17,8 @@ export interface UiState {
   locale: Locale;
   minimapOpen: boolean;
   paletteOpen: boolean;
+  /** Split code/canvas view. */
+  codeOpen: boolean;
   inspectorPinned: boolean;
   modal: ModalKind;
   toast: string | null;
@@ -34,6 +36,7 @@ export const initialUiState: UiState = {
   locale: 'es',
   minimapOpen: true,
   paletteOpen: false,
+  codeOpen: false,
   inspectorPinned: false,
   modal: null,
   toast: null,
@@ -52,6 +55,7 @@ export type UiAction =
   | { type: 'setBrand'; brand: BrandMode }
   | { type: 'setLocale'; locale: Locale }
   | { type: 'toggleMinimap' }
+  | { type: 'toggleCode' }
   | { type: 'setPaletteOpen'; open: boolean }
   | { type: 'toggleInspectorPinned' }
   | { type: 'setModal'; modal: ModalKind }
@@ -104,6 +108,9 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
     case 'toggleMinimap':
       return { ...state, minimapOpen: !state.minimapOpen };
 
+    case 'toggleCode':
+      return { ...state, codeOpen: !state.codeOpen };
+
     case 'setPaletteOpen':
       return { ...state, paletteOpen: action.open };
 
@@ -128,6 +135,7 @@ export interface StoredPreferences {
   brand: BrandMode;
   locale: Locale;
   minimapOpen: boolean;
+  codeOpen: boolean;
 }
 
 export const PREFERENCES_KEY = 'aion-studio-preferences';
@@ -149,5 +157,6 @@ export function toPreferences(state: UiState): StoredPreferences {
     brand: state.brand,
     locale: state.locale,
     minimapOpen: state.minimapOpen,
+    codeOpen: state.codeOpen,
   };
 }

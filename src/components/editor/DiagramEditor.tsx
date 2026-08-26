@@ -5,6 +5,7 @@ import { createEmptyModel } from '@/lib/engine';
 import { safeParseDiagramModel } from '@/lib/domain';
 import { EditorProvider, useEditor } from './EditorProvider';
 import { Canvas } from './canvas/Canvas';
+import { CodePanel } from './code/CodePanel';
 import { CommandPalette } from './chrome/CommandPalette';
 import { InspectorPanel } from './chrome/InspectorPanel';
 import { Minimap } from './chrome/Minimap';
@@ -65,20 +66,23 @@ function CloudSwitchAnnouncer() {
 
 function EditorShell() {
   useKeyboard();
-  const { dispatch, dispatchUi, t } = useEditor();
+  const { ui, dispatch, dispatchUi, t } = useEditor();
   const size = useCanvasSize();
   const fileInput = useRef<HTMLInputElement>(null);
 
   return (
     <div className="editor-root">
       <TopBar />
-      <main className="editor-stage">
-        <Canvas />
-        <ToolDock />
-        <InspectorPanel />
-        <ZoomControls size={size} />
-        <Minimap size={size} />
-      </main>
+      <div className="editor-split">
+        <main className="editor-stage">
+          <Canvas />
+          <ToolDock />
+          <InspectorPanel />
+          <ZoomControls size={size} />
+          <Minimap size={size} />
+        </main>
+        {ui.codeOpen && <CodePanel />}
+      </div>
       <StatusBar />
 
       <CommandPalette />

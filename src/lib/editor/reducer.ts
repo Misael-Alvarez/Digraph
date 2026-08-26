@@ -50,6 +50,16 @@ const madeIds = (...ids: string[]): ActionOutcome => ({ created: ids });
  */
 function applyAction(draft: DiagramModel, action: EditorAction): ActionOutcome {
   switch (action.type) {
+    case 'replaceModel': {
+      // Assigning the collections lets Immer diff them, so undo still works and
+      // untouched shapes keep their identity.
+      draft.canvas = action.model.canvas;
+      draft.shapes = action.model.shapes;
+      draft.connectors = action.model.connectors;
+      draft.showFooter = action.model.showFooter;
+      return NOTHING;
+    }
+
     case 'addBoundary': {
       const s = E.addBoundary(draft, action.x, action.y, action.variant);
       return madeIds(s.id);

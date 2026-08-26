@@ -84,6 +84,7 @@ describe('preferences', () => {
       brand: 'aion',
       locale: 'es',
       minimapOpen: true,
+      codeOpen: false,
     });
     expect('tool' in prefs).toBe(false);
   });
