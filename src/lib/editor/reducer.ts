@@ -1,4 +1,4 @@
-import { applyPatches, enablePatches, produceWithPatches, type Patch } from 'immer';
+import { applyPatches, current, enablePatches, produceWithPatches, type Patch } from 'immer';
 import type { DiagramModel } from '@/lib/domain';
 import * as E from '@/lib/engine';
 import type { SwitchCloudResult } from '@/lib/engine';
@@ -139,6 +139,26 @@ function applyAction(draft: DiagramModel, action: EditorAction): ActionOutcome {
       return NOTHING;
     }
 
+    case 'alignShapes': {
+      const moves = E.alignMoves(draft, action.ids, action.edge);
+      E.applyMoves(draft, moves);
+      E.routeConnectorsFor(
+        draft,
+        new Set(action.ids.flatMap((id) => [...E.collectDescendantIds(draft, id)])),
+      );
+      return NOTHING;
+    }
+
+    case 'distributeShapes': {
+      const moves = E.distributeMoves(draft, action.ids, action.axis);
+      E.applyMoves(draft, moves);
+      E.routeConnectorsFor(
+        draft,
+        new Set(action.ids.flatMap((id) => [...E.collectDescendantIds(draft, id)])),
+      );
+      return NOTHING;
+    }
+
     case 'reorderItem': {
       E.reorderItem(draft, action.id, action.dir);
       const parentId = E.getShape(draft, action.id)?.parentId;
@@ -166,6 +186,14 @@ function applyAction(draft: DiagramModel, action: EditorAction): ActionOutcome {
       return NOTHING;
     }
 
+    case 'reverseConnector': {
+      const connector = draft.connectors.find((c) => c.id === action.id);
+      if (!connector) return NOTHING;
+      [connector.sourceId, connector.targetId] = [connector.targetId, connector.sourceId];
+      E.routeConnector(draft, connector);
+      return NOTHING;
+    }
+
     case 'setConnectorProps': {
       const c = draft.connectors.find((x) => x.id === action.id);
       if (c) Object.assign(c, action.patch);
@@ -174,6 +202,16 @@ function applyAction(draft: DiagramModel, action: EditorAction): ActionOutcome {
 
     case 'paste': {
       const ids = E.pasteShapes(draft, action.payload, action.offsetX, action.offsetY);
+      E.routeConnectorsFor(draft, ids);
+      return madeIds(...ids);
+    }
+
+    case 'duplicateShapes': {
+      // `current` first: the clipboard helper deep-clones what it reads, and
+      // structuredClone cannot copy an Immer draft's proxies.
+      const payload = E.cloneShapes(current(draft), new Set(action.ids));
+      if (!payload.shapes.length) return NOTHING;
+      const ids = E.pasteShapes(draft, payload, 40, 40);
       E.routeConnectorsFor(draft, ids);
       return madeIds(...ids);
     }

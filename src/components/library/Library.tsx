@@ -7,6 +7,7 @@ import { createEmptyModel } from '@/lib/engine';
 import { TEMPLATES } from '@/lib/editor/templates';
 import { thumbnailDataUrl } from '@/lib/store/thumbnail';
 import { useLocale } from '@/lib/i18n/useLocale';
+import { DigraphLogo } from '@/components/brand/DigraphLogo';
 import { useRepository, useRepositoryReady } from '../app/RepositoryProvider';
 import { useUser } from '../app/AuthProvider';
 import { CopyIcon, SearchIcon, TemplateIcon, TrashIcon } from '@/components/icons/ToolIcons';
@@ -74,9 +75,7 @@ export function Library() {
     <div className="library">
       <header className="library-header">
         <div className="library-identity">
-          {/* eslint-disable-next-line @next/next/no-img-element -- fixed-size brand mark */}
-          <img src="/aion_logo.png" alt="" className="topbar-logo" />
-          <span className="topbar-title">{t('app.title')}</span>
+          <DigraphLogo size={26} animate />
         </div>
         <span className="topbar-divider" />
         <span className="library-user">{user.name}</span>

@@ -2,6 +2,18 @@ import type { Locale } from '@/lib/i18n/messages';
 import { DEFAULT_VIEWPORT, type Viewport } from './viewport';
 import type { BrandMode, ToolMode } from './types';
 
+export interface ContextMenuTarget {
+  /** Screen position where the menu opens. */
+  x: number;
+  y: number;
+  /** What was right-clicked; absent means the canvas itself. */
+  shapeId?: string;
+  connectorId?: string;
+  /** Canvas coordinates of the click, for actions that place something. */
+  canvasX: number;
+  canvasY: number;
+}
+
 export type ModalKind =
   'templates' | 'markdown' | 'shortcuts' | 'switchCloud' | 'ai' | 'share' | null;
 
@@ -26,6 +38,7 @@ export interface UiState {
   browserOpen: boolean;
   inspectorPinned: boolean;
   modal: ModalKind;
+  contextMenu: ContextMenuTarget | null;
   toast: string | null;
 }
 
@@ -46,6 +59,7 @@ export const initialUiState: UiState = {
   browserOpen: false,
   inspectorPinned: false,
   modal: null,
+  contextMenu: null,
   toast: null,
 };
 
@@ -68,6 +82,8 @@ export type UiAction =
   | { type: 'setPaletteOpen'; open: boolean }
   | { type: 'toggleInspectorPinned' }
   | { type: 'setModal'; modal: ModalKind }
+  | { type: 'openContextMenu'; target: ContextMenuTarget }
+  | { type: 'closeContextMenu' }
   | { type: 'toast'; message: string | null };
 
 export function uiReducer(state: UiState, action: UiAction): UiState {
@@ -91,7 +107,7 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
     }
 
     case 'clearSelection':
-      return { ...state, selectedIds: new Set(), selectedConnectorId: null };
+      return { ...state, selectedIds: new Set(), selectedConnectorId: null, contextMenu: null };
 
     case 'selectConnector':
       return { ...state, selectedConnectorId: action.id, selectedIds: new Set() };
@@ -134,7 +150,13 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
       return { ...state, inspectorPinned: !state.inspectorPinned };
 
     case 'setModal':
-      return { ...state, modal: action.modal };
+      return { ...state, modal: action.modal, contextMenu: null };
+
+    case 'openContextMenu':
+      return { ...state, contextMenu: action.target, paletteOpen: false };
+
+    case 'closeContextMenu':
+      return { ...state, contextMenu: null };
 
     case 'toast':
       return { ...state, toast: action.message };

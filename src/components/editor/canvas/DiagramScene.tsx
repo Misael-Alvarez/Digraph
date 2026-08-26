@@ -55,14 +55,22 @@ export function DiagramScene({
               .filter((s) => s.type === type)
               .map((shape) => {
                 const Renderer = RENDERERS[type];
-                return (
+                const rendered = (
                   <Renderer
-                    key={shape.id}
                     shape={shape}
                     theme={theme}
                     lookup={lookup}
                     interaction={interactionFor?.(shape)}
                   />
+                );
+                // Only the interactive canvas animates: an export or an embed is
+                // a still image, and a half-played animation would bake into it.
+                return interactionFor ? (
+                  <g key={shape.id} className="shape-enter">
+                    {rendered}
+                  </g>
+                ) : (
+                  <g key={shape.id}>{rendered}</g>
                 );
               })}
           </g>

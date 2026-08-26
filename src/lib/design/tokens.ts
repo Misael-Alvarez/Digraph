@@ -139,15 +139,15 @@ export const lightColors: ColorTokens = {
   textOnAccent: '#ffffff',
   borderSubtle: '#e8eaed',
   borderStrong: '#dadce0',
-  accent: '#6b2fa0',
-  accentHover: '#8b4fc0',
-  accentSubtle: '#f3e8fd',
+  accent: '#5b5bf0',
+  accentHover: '#7b6bff',
+  accentSubtle: '#eceafe',
   danger: '#d93025',
   dangerSubtle: '#fce8e6',
   success: '#188038',
   warning: '#f7941d',
-  selection: '#6b2fa0',
-  guide: '#6b2fa0',
+  selection: '#5b5bf0',
+  guide: '#7c5cff',
 };
 
 export const darkColors: ColorTokens = {
@@ -160,22 +160,28 @@ export const darkColors: ColorTokens = {
   textPrimary: '#e8eaed',
   textSecondary: '#a2a9b5',
   textTertiary: '#6b7280',
-  // Dark mode's accent is a light purple, so text on it must be dark to clear AA.
-  textOnAccent: '#1a1024',
+  // Dark mode's accent is a light violet, so text on it must be dark to clear AA.
+  textOnAccent: '#14132b',
   borderSubtle: '#232733',
   borderStrong: '#333949',
-  accent: '#a475e0',
-  accentHover: '#bb95ec',
-  accentSubtle: '#2a1f3d',
+  accent: '#8b8bff',
+  accentHover: '#a5a0ff',
+  accentSubtle: '#1e1d3d',
   danger: '#f28b82',
   dangerSubtle: '#3d2220',
   success: '#5bb974',
   warning: '#fbbc4a',
-  selection: '#a475e0',
-  guide: '#a475e0',
+  selection: '#8b8bff',
+  guide: '#a08bff',
 };
 
 /** Brand colours of each cloud provider. Fixed by the vendors, not themeable. */
+/** The brand gradient, from the logo. */
+export const brandColors = {
+  from: '#2563ff',
+  to: '#a855f7',
+} as const;
+
 export const providerColors = {
   aws: '#ff9900',
   azure: '#0078d4',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { DigraphMark } from '@/components/brand/DigraphLogo';
 import { LOCALES, LOCALE_LABELS } from '@/lib/i18n/messages';
 import type { SaveStatus } from '@/components/app/useDiagramDocument';
 import type { BrandMode } from '@/lib/editor';
@@ -39,14 +40,9 @@ export function TopBar({ title, status, onRename }: TopBarProps) {
   return (
     <header className="topbar">
       <div className="topbar-identity">
-        {ui.brand === 'aion' || ui.brand === 'dual' ? (
-          // eslint-disable-next-line @next/next/no-img-element -- fixed-size brand mark, not content
-          <img src="/aion_logo.png" alt="" className="topbar-logo" />
-        ) : null}
-        {ui.brand === 'banorte' || ui.brand === 'dual' ? (
-          // eslint-disable-next-line @next/next/no-img-element -- fixed-size brand mark, not content
-          <img src="/banorte_logo.png" alt="" className="topbar-logo is-wide" />
-        ) : null}
+        {/* The app's own mark. The brand selector to the right is about which
+            logo goes into an exported diagram, which is a different thing. */}
+        <DigraphMark size={24} title="Digraph" />
         <button
           type="button"
           className="topbar-back"

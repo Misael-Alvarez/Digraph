@@ -1,5 +1,5 @@
 import type { Connector, DiagramModel, Shape } from '@/lib/domain';
-import type { ClipboardPayload } from '@/lib/engine';
+import type { AlignEdge, ClipboardPayload, DistributeAxis } from '@/lib/engine';
 import type { CloudTarget } from '@/data/cloudEquivalents';
 
 /**
@@ -28,12 +28,16 @@ export type EditorAction =
   | { type: 'resizeShape'; id: string; w: number; h: number }
   | { type: 'setShapeProps'; id: string; patch: Partial<Shape> }
   | { type: 'reorderItem'; id: string; dir: 1 | -1 }
+  | { type: 'alignShapes'; ids: string[]; edge: AlignEdge }
+  | { type: 'distributeShapes'; ids: string[]; axis: DistributeAxis }
   | { type: 'bringToFront'; id: string }
   | { type: 'sendToBack'; id: string }
   | { type: 'addConnector'; sourceId: string; targetId: string }
   | { type: 'deleteConnector'; id: string }
+  | { type: 'reverseConnector'; id: string }
   | { type: 'setConnectorProps'; id: string; patch: Partial<Connector> }
   | { type: 'paste'; payload: ClipboardPayload; offsetX: number; offsetY: number }
+  | { type: 'duplicateShapes'; ids: string[] }
   | { type: 'autoLayout' }
   | { type: 'switchCloud'; target: CloudTarget }
   | { type: 'switchShapeCloud'; id: string; target: CloudTarget }

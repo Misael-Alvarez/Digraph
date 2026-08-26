@@ -3,8 +3,8 @@ import { AppProviders } from '@/components/app/AppProviders';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'AION Architecture Studio',
-  description: 'Cloud architecture diagrams for developers: draw them or write them.',
+  title: 'Digraph',
+  description: 'Cloud architecture diagrams for developers: draw them, or write them.',
 };
 
 export default function RootLayout({

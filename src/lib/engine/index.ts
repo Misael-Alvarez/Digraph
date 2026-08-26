@@ -8,3 +8,4 @@ export * from './layout';
 export * from './clipboard';
 export * from './cloud';
 export * from './markdown';
+export * from './align';

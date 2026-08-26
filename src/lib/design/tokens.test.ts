@@ -161,3 +161,55 @@ describe('readableTextOn', () => {
     expect(luminance('#fff')).toBeCloseTo(luminance('#ffffff'));
   });
 });
+
+describe('stylesheet integrity', () => {
+  /** Every custom property the stylesheet defines anywhere. */
+  const defined = new Set([...css.matchAll(/^\s*(--[a-z0-9-]+)\s*:/gim)].map((m) => m[1]));
+
+  /** Every custom property it reads. */
+  const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
+
+  /** Set by React inline styles, so the stylesheet never declares them. */
+  const RUNTIME_PROVIDED = new Set(['--chip-color', '--cloud-color']);
+
+  it('defines every custom property it uses', () => {
+    // An undefined property makes the whole declaration invalid, silently. That
+    // is how the library lost its padding and every button lost its transition:
+    // `var(--space-10)` and `var(--duration-instant)` were never declared.
+    const missing = [...used].filter((name) => !defined.has(name) && !RUNTIME_PROVIDED.has(name));
+    expect(missing).toEqual([]);
+  });
+
+  it('declares the full radius and duration scales', () => {
+    for (const name of [
+      '--radius-sm',
+      '--radius-md',
+      '--radius-lg',
+      '--radius-xl',
+      '--radius-full',
+    ]) {
+      expect(defined.has(name), name).toBe(true);
+    }
+    for (const name of [
+      '--duration-instant',
+      '--duration-fast',
+      '--duration-base',
+      '--duration-slow',
+    ]) {
+      expect(defined.has(name), name).toBe(true);
+    }
+  });
+
+  it('exposes the whole spacing scale it references', () => {
+    for (const step of [1, 2, 3, 4, 5, 6, 8, 10, 12]) {
+      expect(defined.has(`--space-${step}`), `--space-${step}`).toBe(true);
+    }
+  });
+
+  it('defines the brand gradient in both themes', () => {
+    expect(readVar(':root', 'brand-from')).toBeTruthy();
+    expect(readVar(':root', 'brand-to')).toBeTruthy();
+    expect(readVar('.dark', 'brand-from')).toBeTruthy();
+    expect(readVar('.dark', 'brand-to')).toBeTruthy();
+  });
+});

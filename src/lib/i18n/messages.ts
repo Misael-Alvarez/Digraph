@@ -12,7 +12,7 @@ export type Locale = (typeof LOCALES)[number];
 export const LOCALE_LABELS: Record<Locale, string> = { es: 'Español', en: 'English' };
 
 const en = {
-  'app.title': 'Architecture Studio',
+  'app.title': 'Digraph',
   'app.untitled': 'Untitled diagram',
 
   'tool.select': 'Select',
@@ -63,6 +63,25 @@ const en = {
   'palette.services': 'Services',
   'palette.commands': 'Commands',
   'palette.empty': 'No matches',
+
+  'menu.addBoundary': 'Add cloud boundary',
+  'menu.addGroup': 'Add service group',
+  'menu.addItem': 'Add service to this group',
+  'menu.editLabel': 'Rename',
+  'menu.dashed': 'Dashed line',
+  'menu.solid': 'Solid line',
+  'menu.reverse': 'Reverse direction',
+  'menu.selectAllHere': 'Select all',
+
+  'align.title': 'Align and distribute',
+  'align.left': 'Align left',
+  'align.centerX': 'Align centres horizontally',
+  'align.right': 'Align right',
+  'align.top': 'Align top',
+  'align.centerY': 'Align centres vertically',
+  'align.bottom': 'Align bottom',
+  'align.distributeH': 'Space evenly across',
+  'align.distributeV': 'Space evenly down',
 
   'browser.title': 'Services',
   'browser.search': 'Filter services…',
@@ -116,7 +135,7 @@ const en = {
 
   'share.title': 'Shared architecture diagram',
   'share.broken': 'This link does not contain a readable diagram.',
-  'share.madeWith': 'Made with Architecture Studio',
+  'share.madeWith': 'Made with Digraph',
   'share.dialogTitle': 'Share',
   'share.link': 'Link',
   'share.readme': 'For a GitHub README',
@@ -177,7 +196,7 @@ const en = {
 export type MessageKey = keyof typeof en;
 
 const es: Record<MessageKey, string> = {
-  'app.title': 'Architecture Studio',
+  'app.title': 'Digraph',
   'app.untitled': 'Diagrama sin título',
 
   'tool.select': 'Seleccionar',
@@ -228,6 +247,25 @@ const es: Record<MessageKey, string> = {
   'palette.services': 'Servicios',
   'palette.commands': 'Comandos',
   'palette.empty': 'Sin resultados',
+
+  'menu.addBoundary': 'Añadir frontera de nube',
+  'menu.addGroup': 'Añadir grupo de servicios',
+  'menu.addItem': 'Añadir servicio a este grupo',
+  'menu.editLabel': 'Renombrar',
+  'menu.dashed': 'Línea discontinua',
+  'menu.solid': 'Línea continua',
+  'menu.reverse': 'Invertir sentido',
+  'menu.selectAllHere': 'Seleccionar todo',
+
+  'align.title': 'Alinear y distribuir',
+  'align.left': 'Alinear a la izquierda',
+  'align.centerX': 'Centrar en horizontal',
+  'align.right': 'Alinear a la derecha',
+  'align.top': 'Alinear arriba',
+  'align.centerY': 'Centrar en vertical',
+  'align.bottom': 'Alinear abajo',
+  'align.distributeH': 'Espaciar en horizontal',
+  'align.distributeV': 'Espaciar en vertical',
 
   'browser.title': 'Servicios',
   'browser.search': 'Filtrar servicios…',
@@ -282,7 +320,7 @@ const es: Record<MessageKey, string> = {
 
   'share.title': 'Diagrama de arquitectura compartido',
   'share.broken': 'Este enlace no contiene un diagrama legible.',
-  'share.madeWith': 'Hecho con Architecture Studio',
+  'share.madeWith': 'Hecho con Digraph',
   'share.dialogTitle': 'Compartir',
   'share.link': 'Enlace',
   'share.readme': 'Para un README de GitHub',

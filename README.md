@@ -1,4 +1,4 @@
-# AION Architecture Studio
+# Digraph
 
 A cloud architecture diagram editor for developers. Draw on a canvas, or write
 the architecture as YAML and watch it draw itself — the two stay in sync.

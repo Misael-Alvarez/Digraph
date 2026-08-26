@@ -370,3 +370,132 @@ describe('immutability', () => {
     expect(moved.model.shapes.find((s) => s.id === untouched.id)).toBe(untouched);
   });
 });
+
+describe('duplicateShapes', () => {
+  it('copies the selection and leaves the original alone', () => {
+    const { state, groupId } = withOneGroup();
+    const duplicated = run(state, { type: 'duplicateShapes', ids: [groupId] });
+
+    expect(duplicated.model.shapes).toHaveLength(6);
+    expect(getShape(duplicated.model, groupId)).toBeDefined();
+    expect(duplicated.lastCreated).toHaveLength(3);
+  });
+
+  it('offsets the copy so it is visible', () => {
+    const { state, groupId } = withOneGroup();
+    const duplicated = run(state, { type: 'duplicateShapes', ids: [groupId] });
+    const copyId = duplicated.lastCreated.find((id) => id.startsWith('grp'))!;
+
+    const original = getShape(duplicated.model, groupId)!;
+    const copy = getShape(duplicated.model, copyId)!;
+    expect(copy.x).toBe(original.x + 40);
+    expect(copy.y).toBe(original.y + 40);
+  });
+
+  it('carries the whole subtree, not just the top shape', () => {
+    const { state, groupId } = withOneGroup();
+    const duplicated = run(state, { type: 'duplicateShapes', ids: [groupId] });
+    const copyId = duplicated.lastCreated.find((id) => id.startsWith('grp'))!;
+
+    const container = children(duplicated.model, copyId);
+    expect(container).toHaveLength(1);
+    expect(children(duplicated.model, container[0].id)).toHaveLength(1);
+  });
+
+  it('duplicates several shapes at once', () => {
+    let state = initialDocState(createEmptyModel());
+    state = run(state, { type: 'addGroup', x: 0, y: 0 }, { type: 'addGroup', x: 900, y: 0 });
+    const groups = state.model.shapes.filter((s) => s.type === 'group').map((s) => s.id);
+
+    const duplicated = run(state, { type: 'duplicateShapes', ids: groups });
+    expect(duplicated.model.shapes.filter((s) => s.type === 'group')).toHaveLength(4);
+  });
+
+  it('is a single undo step', () => {
+    const { state, groupId } = withOneGroup();
+    const duplicated = run(state, { type: 'duplicateShapes', ids: [groupId] });
+    const undone = run(duplicated, { type: 'undo' });
+    expect(undone.model.shapes).toHaveLength(3);
+  });
+
+  it('does nothing for an empty or unknown selection', () => {
+    const { state } = withOneGroup();
+    expect(run(state, { type: 'duplicateShapes', ids: [] })).toBe(state);
+    expect(run(state, { type: 'duplicateShapes', ids: ['ghost'] })).toBe(state);
+  });
+});
+
+describe('alignment', () => {
+  function twoApart() {
+    let state = initialDocState(createEmptyModel());
+    state = run(state, { type: 'addGroup', x: 100, y: 100 }, { type: 'addGroup', x: 800, y: 500 });
+    const seeded = run(state, { type: 'load', model: state.model });
+    return {
+      state: seeded,
+      ids: seeded.model.shapes.filter((s) => s.type === 'group').map((s) => s.id),
+    };
+  }
+
+  it('aligns and stays undoable in one step', () => {
+    const { state, ids } = twoApart();
+    const aligned = run(state, { type: 'alignShapes', ids, edge: 'left' });
+    const xs = aligned.model.shapes.filter((s) => s.type === 'group').map((s) => s.x);
+    expect(new Set(xs).size).toBe(1);
+
+    const undone = run(aligned, { type: 'undo' });
+    expect(
+      new Set(undone.model.shapes.filter((s) => s.type === 'group').map((s) => s.x)).size,
+    ).toBe(2);
+  });
+
+  it('moves each group together with its contents', () => {
+    const { state, ids } = twoApart();
+    const before = state.model.shapes.find((s) => s.type === 'item' && s.x > 700)!;
+    const aligned = run(state, { type: 'alignShapes', ids, edge: 'left' });
+    const after = getShape(aligned.model, before.id)!;
+    expect(after.x).toBeLessThan(before.x);
+  });
+
+  it('does nothing with fewer than two shapes', () => {
+    const { state, ids } = twoApart();
+    expect(run(state, { type: 'alignShapes', ids: [ids[0]], edge: 'left' })).toBe(state);
+  });
+
+  it('spaces three shapes evenly', () => {
+    let state = initialDocState(createEmptyModel());
+    state = run(
+      state,
+      { type: 'addGroup', x: 0, y: 0 },
+      { type: 'addGroup', x: 700, y: 0 },
+      { type: 'addGroup', x: 1800, y: 0 },
+    );
+    const ids = state.model.shapes.filter((s) => s.type === 'group').map((s) => s.id);
+
+    const spaced = run(state, { type: 'distributeShapes', ids, axis: 'horizontal' });
+    const groups = spaced.model.shapes.filter((s) => s.type === 'group').sort((a, b) => a.x - b.x);
+    expect(groups[1].x - (groups[0].x + groups[0].w)).toBeCloseTo(
+      groups[2].x - (groups[1].x + groups[1].w),
+    );
+  });
+});
+
+describe('reverseConnector', () => {
+  it('swaps the endpoints and reroutes', () => {
+    let state = initialDocState(createEmptyModel());
+    state = run(state, { type: 'addGroup', x: 0, y: 0 }, { type: 'addGroup', x: 0, y: 800 });
+    const items = state.model.shapes.filter((s) => s.type === 'item');
+    state = run(state, { type: 'addConnector', sourceId: items[0].id, targetId: items[1].id });
+    const before = state.model.connectors[0];
+
+    const reversed = run(state, { type: 'reverseConnector', id: before.id });
+    const after = reversed.model.connectors[0];
+    expect(after.sourceId).toBe(before.targetId);
+    expect(after.targetId).toBe(before.sourceId);
+    expect(after.waypoints).not.toEqual(before.waypoints);
+  });
+
+  it('ignores an unknown connector', () => {
+    const { state } = withOneGroup();
+    expect(run(state, { type: 'reverseConnector', id: 'ghost' })).toBe(state);
+  });
+});

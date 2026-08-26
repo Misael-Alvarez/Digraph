@@ -14,6 +14,8 @@ import { Defs } from './Defs';
 import { DiagramScene } from './DiagramScene';
 import type { ShapeInteraction } from './shapes';
 import { EmptyState } from './EmptyState';
+import { ContextMenu } from './ContextMenu';
+import { SelectionToolbar } from './SelectionToolbar';
 
 const HANDLE = 9;
 
@@ -232,16 +234,26 @@ export function Canvas() {
       },
       onContextMenu: (e, id) => {
         e.preventDefault();
-        dispatchUi({ type: 'select', ids: [id] });
+        e.stopPropagation();
+        // Right-clicking outside the current selection selects the target, but
+        // right-clicking inside it keeps the selection so the menu can act on all.
+        if (!ui.selectedIds.has(id)) dispatchUi({ type: 'select', ids: [id] });
+        const point = toCanvas(ui.viewport, toLocal(e));
+        dispatchUi({
+          type: 'openContextMenu',
+          target: { x: e.clientX, y: e.clientY, shapeId: id, canvasX: point.x, canvasY: point.y },
+        });
       },
     }),
     [
       ui.selectedIds,
       ui.connectorSourceId,
+      ui.viewport,
       collisions,
       onShapePointerDown,
       onShapeClick,
       dispatchUi,
+      toLocal,
     ],
   );
 
@@ -259,13 +271,23 @@ export function Canvas() {
       className="canvas-host"
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
+      onContextMenu={(e) => {
+        // Bound on the host, not the SVG: overlays that float above the canvas —
+        // the empty state's buttons, for one — would otherwise swallow the click.
+        if (e.defaultPrevented) return;
+        e.preventDefault();
+        const point = toCanvas(ui.viewport, toLocal(e));
+        dispatchUi({
+          type: 'openContextMenu',
+          target: { x: e.clientX, y: e.clientY, canvasX: point.x, canvasY: point.y },
+        });
+      }}
     >
       <svg
         ref={svgRef}
         className="canvas-surface"
         style={{ cursor, background: theme.sheet }}
         onPointerDown={onBackgroundPointerDown}
-        onContextMenu={(e) => e.preventDefault()}
         role="application"
         aria-label={t('app.title')}
         tabIndex={-1}
@@ -300,7 +322,19 @@ export function Canvas() {
               },
               onContextMenu: (e, id) => {
                 e.preventDefault();
+                e.stopPropagation();
                 dispatchUi({ type: 'selectConnector', id });
+                const point = toCanvas(ui.viewport, toLocal(e));
+                dispatchUi({
+                  type: 'openContextMenu',
+                  target: {
+                    x: e.clientX,
+                    y: e.clientY,
+                    connectorId: id,
+                    canvasX: point.x,
+                    canvasY: point.y,
+                  },
+                });
               },
             }}
           />
@@ -402,6 +436,8 @@ export function Canvas() {
       </svg>
 
       {doc.model.shapes.length === 0 && <EmptyState />}
+      <SelectionToolbar />
+      <ContextMenu />
     </div>
   );
 }
