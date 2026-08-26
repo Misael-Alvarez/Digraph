@@ -1,10 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-/** Page coordinates of a point given in canvas-element coordinates. */
-async function pagePoint(page: Page, x: number, y: number) {
-  const box = await page.locator('.canvas-surface').boundingBox();
-  return { x: (box?.x ?? 0) + x, y: (box?.y ?? 0) + y };
-}
+import { openNewDiagram, pagePoint } from './helpers';
 
 /** Canvas-space position of the first group, read from its tagged rect. */
 async function groupRect(page: Page) {
@@ -21,10 +16,7 @@ test.beforeEach(async ({ page }) => {
   page.on('console', (m) => {
     if (m.type() === 'error') errors.push(m.text());
   });
-  await page.goto('/');
-  await page.waitForSelector('.canvas-surface');
-  // Start every test from a blank canvas with no stored preferences.
-  await page.evaluate(() => localStorage.clear());
+  await openNewDiagram(page);
   (page as Page & { __errors?: string[] }).__errors = errors;
 });
 
@@ -173,4 +165,16 @@ test('every advertised command is reachable from the palette', async ({ page }) 
     await expect(page.locator('.palette-row').first()).toBeVisible();
     await page.keyboard.press('Escape');
   }
+});
+
+test('a resting pointer cannot steal the palette selection', async ({ page }) => {
+  // Opening the palette under a stationary cursor used to highlight whatever row
+  // rendered beneath it, so a blind Enter could fire a destructive command.
+  await page.mouse.move(720, 300);
+  await page.keyboard.press('ControlOrMeta+k');
+  await page.locator('.palette-input').fill('IA');
+  await expect(page.locator('.palette-row.is-active .palette-label')).toContainText('IA');
+
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('dialog')).toBeVisible();
 });

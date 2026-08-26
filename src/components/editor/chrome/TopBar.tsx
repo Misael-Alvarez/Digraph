@@ -1,10 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { LOCALES, LOCALE_LABELS } from '@/lib/i18n/messages';
+import type { SaveStatus } from '@/components/app/useDiagramDocument';
 import type { BrandMode } from '@/lib/editor';
 import { useEditor } from '../EditorProvider';
 import { useCommands } from '../hooks/useCommands';
-import { MoonIcon, RedoIcon, SearchIcon, SunIcon, UndoIcon } from '../icons/ToolIcons';
+import { MoonIcon, RedoIcon, SearchIcon, SunIcon, UndoIcon } from '@/components/icons/ToolIcons';
 
 const BRANDS: BrandMode[] = ['aion', 'banorte', 'dual', 'none'];
 const BRAND_LABEL: Record<BrandMode, string> = {
@@ -14,10 +16,24 @@ const BRAND_LABEL: Record<BrandMode, string> = {
   none: '—',
 };
 
+interface TopBarProps {
+  title: string;
+  status: SaveStatus;
+  onRename: (title: string) => void;
+}
+
+const STATUS_KEY = {
+  saved: 'status.saved',
+  pending: 'status.pending',
+  saving: 'status.saving',
+  error: 'status.error',
+} as const;
+
 /** Minimal top bar: identity on the left, view controls on the right. */
-export function TopBar() {
+export function TopBar({ title, status, onRename }: TopBarProps) {
   const { ui, dispatchUi, canUndo, canRedo, t } = useEditor();
   const commands = useCommands();
+  const router = useRouter();
   const run = (id: string) => commands.find((c) => c.id === id)?.run();
 
   return (
@@ -31,7 +47,22 @@ export function TopBar() {
           // eslint-disable-next-line @next/next/no-img-element -- fixed-size brand mark, not content
           <img src="/banorte_logo.png" alt="" className="topbar-logo is-wide" />
         ) : null}
-        <span className="topbar-title">{t('app.title')}</span>
+        <button
+          type="button"
+          className="topbar-back"
+          title={t('library.back')}
+          aria-label={t('library.back')}
+          onClick={() => router.push('/')}
+        >
+          ‹
+        </button>
+        <input
+          className="topbar-name"
+          value={title}
+          aria-label={t('inspector.label')}
+          onChange={(e) => onRename(e.target.value)}
+        />
+        <span className={`save-status is-${status}`}>{t(STATUS_KEY[status])}</span>
       </div>
 
       <button

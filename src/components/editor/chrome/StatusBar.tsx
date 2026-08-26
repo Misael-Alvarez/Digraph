@@ -1,6 +1,7 @@
 'use client';
 
 import type { MessageKey } from '@/lib/i18n/messages';
+import type { SaveStatus } from '@/components/app/useDiagramDocument';
 import { useEditor } from '../EditorProvider';
 
 const HINTS: Record<string, MessageKey> = {
@@ -11,7 +12,7 @@ const HINTS: Record<string, MessageKey> = {
   item: 'hint.item',
 };
 
-export function StatusBar() {
+export function StatusBar({ status }: { status: SaveStatus }) {
   const { doc, ui, t } = useEditor();
 
   const hint =
@@ -32,7 +33,17 @@ export function StatusBar() {
       <span className="statusbar-meta">
         {t('status.connectors', { count: doc.model.connectors.length })}
       </span>
-      <span className="statusbar-meta is-muted">{t('status.saved')}</span>
+      <span className={`statusbar-meta save-status is-${status}`}>
+        {t(
+          status === 'saving'
+            ? 'status.saving'
+            : status === 'error'
+              ? 'status.error'
+              : status === 'pending'
+                ? 'status.pending'
+                : 'status.saved',
+        )}
+      </span>
     </footer>
   );
 }

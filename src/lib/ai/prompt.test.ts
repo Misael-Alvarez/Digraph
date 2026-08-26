@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { SERVICE_ICONS } from '@/data/serviceIcons';
 import { parseDsl } from '@/lib/dsl';
-import { EXPLAIN_SYSTEM_PROMPT, SYSTEM_PROMPT, buildExplainPrompt, buildUserPrompt } from './prompt';
+import {
+  EXPLAIN_SYSTEM_PROMPT,
+  SYSTEM_PROMPT,
+  buildExplainPrompt,
+  buildUserPrompt,
+} from './prompt';
 
-const sample = parseDsl('cloud: aws\nnodes:\n  fn: lambda\n  db: dynamodb\nedges:\n  - fn -> db: R/W\n').model!;
+const sample = parseDsl(
+  'cloud: aws\nnodes:\n  fn: lambda\n  db: dynamodb\nedges:\n  - fn -> db: R/W\n',
+).model!;
 
 describe('SYSTEM_PROMPT', () => {
   it('lists every service the model is allowed to use', () => {

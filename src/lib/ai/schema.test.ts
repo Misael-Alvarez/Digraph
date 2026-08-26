@@ -93,7 +93,13 @@ describe('aiToDsl', () => {
       ...base,
       nodes: [
         ...base.nodes,
-        { id: 'made-up', service: 'aws-quantumflux', label: 'Quantum Flux', note: '', boundary: '' },
+        {
+          id: 'made-up',
+          service: 'aws-quantumflux',
+          label: 'Quantum Flux',
+          note: '',
+          boundary: '',
+        },
       ],
       edges: [...base.edges, { from: 'db', to: 'made-up', label: 'x' }],
     });

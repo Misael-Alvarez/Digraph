@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { openNewDiagram } from './helpers';
 
 async function openCode(page: Page) {
   await page.keyboard.press('ControlOrMeta+/');
@@ -31,11 +32,7 @@ async function setCode(page: Page, text: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-  await page.waitForSelector('.canvas-surface');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await page.waitForSelector('.canvas-surface');
+  await openNewDiagram(page);
 });
 
 test('opens and closes the split view', async ({ page }) => {

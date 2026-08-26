@@ -9,7 +9,7 @@ import { providerColors } from '@/lib/design/tokens';
 import { useEditor } from '../EditorProvider';
 import { SHORTCUT_GROUPS } from '../hooks/useKeyboard';
 import type { MessageKey } from '@/lib/i18n/messages';
-import { CloseIcon } from '../icons/ToolIcons';
+import { CloseIcon } from '@/components/icons/ToolIcons';
 
 function Dialog({
   title,

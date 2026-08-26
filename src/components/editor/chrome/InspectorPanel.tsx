@@ -5,7 +5,7 @@ import { SERVICE_ICONS } from '@/data/serviceIcons';
 import { getEquivalents, type CloudTarget } from '@/data/cloudEquivalents';
 import { providerColors } from '@/lib/design/tokens';
 import { useEditor } from '../EditorProvider';
-import { TrashIcon } from '../icons/ToolIcons';
+import { TrashIcon } from '@/components/icons/ToolIcons';
 
 const CLOUDS: { target: CloudTarget; label: string; color: string; prefix: string }[] = [
   { target: 'aws', label: 'AWS', color: providerColors.aws, prefix: 'aws-' },

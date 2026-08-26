@@ -3,24 +3,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SERVICE_ICONS, CATEGORY_LABELS } from '@/data/serviceIcons';
 import { SVG_ICON_DEFS } from '@/components/icons/svgIconDefs';
+import { scoreMatch } from '@/lib/editor/search';
 import { useEditor } from '../EditorProvider';
 import { useCommands, type Command } from '../hooks/useCommands';
-import { SearchIcon } from '../icons/ToolIcons';
+import { SearchIcon } from '@/components/icons/ToolIcons';
 
 type Row =
   | { kind: 'command'; command: Command }
   | { kind: 'service'; key: string; label: string; description?: string; category: string };
 
 const MAX_SERVICES = 40;
-
-function score(haystack: string, needle: string): number {
-  const text = haystack.toLowerCase();
-  if (!needle) return 1;
-  const index = text.indexOf(needle);
-  if (index === -1) return 0;
-  // Prefix matches rank above substring matches.
-  return index === 0 ? 3 : 2;
-}
 
 /**
  * Command palette.
@@ -54,7 +46,7 @@ function PaletteContents() {
 
     const matchedCommands = commands
       .filter((c) => c.enabled !== false)
-      .map((c) => ({ command: c, rank: score(c.label, needle) }))
+      .map((c) => ({ command: c, rank: scoreMatch(c.label, needle) }))
       .filter((r) => r.rank > 0)
       .sort((a, b) => b.rank - a.rank)
       .map<Row>((r) => ({ kind: 'command', command: r.command }));
@@ -62,9 +54,9 @@ function PaletteContents() {
     const matchedServices = SERVICE_ICONS.map((s) => ({
       service: s,
       rank: Math.max(
-        score(s.label, needle),
-        score(s.key, needle),
-        score(s.description ?? '', needle) * 0.5,
+        scoreMatch(s.label, needle),
+        scoreMatch(s.key, needle),
+        scoreMatch(s.description ?? '', needle) * 0.5,
       ),
     }))
       .filter((r) => r.rank > 0)
@@ -162,7 +154,10 @@ function PaletteContents() {
                 role="option"
                 aria-selected={index === active}
                 className={`palette-row${index === active ? ' is-active' : ''}`}
-                onPointerEnter={() => setActiveIndex(index)}
+                // pointermove, not pointerenter: a stationary cursor that the
+                // list happens to open under would otherwise steal the selection,
+                // so a blind Enter could fire whatever sat beneath it.
+                onPointerMove={() => setActiveIndex(index)}
                 onClick={() => run(row)}
               >
                 {row.kind === 'service' ? (

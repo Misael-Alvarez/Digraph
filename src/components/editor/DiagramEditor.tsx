@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { createEmptyModel } from '@/lib/engine';
-import { safeParseDiagramModel } from '@/lib/domain';
+import { useRouter } from 'next/navigation';
+import { safeParseDiagramModel, type DiagramModel } from '@/lib/domain';
+import { useLocale } from '@/lib/i18n/useLocale';
+import { useDiagramDocument, type SaveStatus } from '../app/useDiagramDocument';
 import { EditorProvider, useEditor } from './EditorProvider';
 import { Canvas } from './canvas/Canvas';
 import { CodePanel } from './code/CodePanel';
@@ -14,6 +16,7 @@ import { Modals } from './chrome/Modals';
 import { StatusBar } from './chrome/StatusBar';
 import { ToolDock } from './chrome/ToolDock';
 import { TopBar } from './chrome/TopBar';
+import { VersionPanel } from './chrome/VersionPanel';
 import { ZoomControls } from './chrome/ZoomControls';
 import { useKeyboard } from './hooks/useKeyboard';
 
@@ -65,7 +68,43 @@ function CloudSwitchAnnouncer() {
   return null;
 }
 
-function EditorShell() {
+/**
+ * Writes the model back to storage as it changes.
+ *
+ * A separate component so only it re-renders on every edit, and `onChange` must
+ * be referentially stable: an inline arrow here re-runs the effect on every
+ * render, which restarts the debounce timer before it can ever fire — the
+ * autosave silently never happens.
+ */
+function Autosave({ onChange }: { onChange: (model: DiagramModel) => void }) {
+  const { doc } = useEditor();
+  const first = useRef(true);
+
+  useEffect(() => {
+    // The model that arrived from storage does not need writing back.
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    onChange(doc.model);
+  }, [doc.model, onChange]);
+
+  return null;
+}
+
+function EditorShell({
+  title,
+  status,
+  onRename,
+  onSnapshot,
+  onRestored,
+}: {
+  title: string;
+  status: SaveStatus;
+  onRename: (title: string) => void;
+  onSnapshot: (model: DiagramModel) => void;
+  onRestored: () => void;
+}) {
   useKeyboard();
   const { ui, dispatch, dispatchUi, t } = useEditor();
   const size = useCanvasSize();
@@ -73,7 +112,7 @@ function EditorShell() {
 
   return (
     <div className="editor-root">
-      <TopBar />
+      <TopBar title={title} status={status} onRename={onRename} />
       <div className="editor-split">
         <main className="editor-stage">
           <Canvas />
@@ -83,8 +122,9 @@ function EditorShell() {
           <Minimap size={size} />
         </main>
         {ui.codeOpen && <CodePanel />}
+        {ui.versionsOpen && <VersionPanel onSnapshot={onSnapshot} onRestored={onRestored} />}
       </div>
-      <StatusBar />
+      <StatusBar status={status} />
 
       <CommandPalette />
       <Modals />
@@ -118,10 +158,38 @@ function EditorShell() {
   );
 }
 
-export default function DiagramEditor() {
+/** Loads one stored diagram and hands it to the editor. */
+export default function DiagramEditor({ documentId }: { documentId: string }) {
+  const document_ = useDiagramDocument(documentId);
+  const router = useRouter();
+  const { t } = useLocale();
+
+  if (document_.loading) {
+    return <div className="page-note">{t('library.loading')}</div>;
+  }
+
+  if (document_.notFound || !document_.record) {
+    return (
+      <div className="page-note">
+        <p>{t('library.notFound')}</p>
+        <button type="button" className="button" onClick={() => router.push('/')}>
+          {t('library.back')}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <EditorProvider initialModel={createEmptyModel()}>
-      <EditorShell />
+    // Remount when the id changes so the reducer starts from the right document.
+    <EditorProvider key={document_.record.id} initialModel={document_.record.model}>
+      <Autosave onChange={document_.save} />
+      <EditorShell
+        title={document_.record.title}
+        status={document_.status}
+        onRename={(title) => void document_.rename(title)}
+        onSnapshot={(model) => document_.save(model, { immediate: true, snapshot: true })}
+        onRestored={() => void document_.reload()}
+      />
     </EditorProvider>
   );
 }

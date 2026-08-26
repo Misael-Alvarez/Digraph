@@ -59,12 +59,8 @@ export async function POST(request: Request) {
       model: AI_MODEL,
       max_tokens: 2000,
       thinking: { type: 'adaptive' },
-      system: [
-        { type: 'text', text: EXPLAIN_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
-      ],
-      messages: [
-        { role: 'user', content: buildExplainPrompt(body.data.question, diagram.data) },
-      ],
+      system: [{ type: 'text', text: EXPLAIN_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      messages: [{ role: 'user', content: buildExplainPrompt(body.data.question, diagram.data) }],
     });
 
     const encoder = new TextEncoder();
@@ -99,6 +95,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const failure = describeError(error);
-    return NextResponse.json({ code: failure.code, message: failure.message }, { status: failure.status });
+    return NextResponse.json(
+      { code: failure.code, message: failure.message },
+      { status: failure.status },
+    );
   }
 }

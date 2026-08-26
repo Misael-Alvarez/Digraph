@@ -10,7 +10,7 @@ import {
   ItemIcon,
   SelectIcon,
   SubBoundaryIcon,
-} from '../icons/ToolIcons';
+} from '@/components/icons/ToolIcons';
 
 interface ToolDefinition {
   mode: ToolMode;

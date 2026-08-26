@@ -26,7 +26,9 @@ function catalogue(): string {
 /** Cross-cloud roles, so the model can retarget an architecture sensibly. */
 function equivalences(): string {
   return CLOUD_EQUIVALENCES.filter((row) => row.aws || row.azure || row.gcp)
-    .map((row) => `${row.role}: aws=${row.aws ?? '—'} azure=${row.azure ?? '—'} gcp=${row.gcp ?? '—'}`)
+    .map(
+      (row) => `${row.role}: aws=${row.aws ?? '—'} azure=${row.azure ?? '—'} gcp=${row.gcp ?? '—'}`,
+    )
     .join('\n');
 }
 
@@ -59,7 +61,8 @@ export function buildUserPrompt(
   prompt: string,
   model?: DiagramModel,
 ): string {
-  const current = model && model.shapes.length ? serializeDsl(model, { includeLayout: false }) : null;
+  const current =
+    model && model.shapes.length ? serializeDsl(model, { includeLayout: false }) : null;
 
   switch (operation) {
     case 'modify':

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiError, requestDiagram, requestReview } from '@/lib/ai/requests';
 import { useEditor } from '../EditorProvider';
-import { CloseIcon } from '../icons/ToolIcons';
+import { CloseIcon } from '@/components/icons/ToolIcons';
 
 type Mode = 'build' | 'review';
 
@@ -67,7 +67,12 @@ export function AiDialog() {
 
     try {
       if (mode === 'review') {
-        await requestReview(text, doc.model, (chunk) => setAnswer((a) => a + chunk), controller.signal);
+        await requestReview(
+          text,
+          doc.model,
+          (chunk) => setAnswer((a) => a + chunk),
+          controller.signal,
+        );
       } else {
         const result = await requestDiagram(
           hasDiagram ? 'modify' : 'generate',
@@ -83,11 +88,7 @@ export function AiDialog() {
     } catch (caught) {
       if (controller.signal.aborted) return;
       if (caught instanceof AiError) {
-        setError(
-          caught.retryAfter
-            ? `${caught.message} (${caught.retryAfter}s)`
-            : caught.message,
-        );
+        setError(caught.retryAfter ? `${caught.message} (${caught.retryAfter}s)` : caught.message);
       } else {
         setError('The request failed.');
       }
@@ -123,7 +124,12 @@ export function AiDialog() {
               </button>
             ))}
           </div>
-          <button type="button" className="icon-button" aria-label={t('modal.close')} onClick={close}>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={t('modal.close')}
+            onClick={close}
+          >
             <CloseIcon size={16} />
           </button>
         </header>
@@ -167,11 +173,13 @@ export function AiDialog() {
             ))}
           </div>
 
-          {mode === 'review' && !hasDiagram && (
-            <p className="ai-note">{t('ai.needsDiagram')}</p>
-          )}
+          {mode === 'review' && !hasDiagram && <p className="ai-note">{t('ai.needsDiagram')}</p>}
 
-          {error && <p className="ai-error" role="alert">{error}</p>}
+          {error && (
+            <p className="ai-error" role="alert">
+              {error}
+            </p>
+          )}
 
           {summary && (
             <div className="ai-result">
@@ -192,7 +200,12 @@ export function AiDialog() {
                 {t('modal.cancel')}
               </button>
             )}
-            <button type="button" className="button is-primary" disabled={!canRun} onClick={() => void run()}>
+            <button
+              type="button"
+              className="button is-primary"
+              disabled={!canRun}
+              onClick={() => void run()}
+            >
               {busy ? t('ai.working') : t(mode === 'review' ? 'ai.ask' : 'ai.generate')}
             </button>
           </div>

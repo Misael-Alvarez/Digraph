@@ -46,9 +46,10 @@ function headers(): HeadersInit {
 }
 
 async function failure(response: Response): Promise<AiError> {
-  const body = (await response.json().catch(() => null)) as
-    | { code?: string; message?: string }
-    | null;
+  const body = (await response.json().catch(() => null)) as {
+    code?: string;
+    message?: string;
+  } | null;
   const retryAfter = Number(response.headers.get('retry-after'));
   return new AiError(
     body?.code ?? 'unknown',

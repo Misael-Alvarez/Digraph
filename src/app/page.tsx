@@ -2,8 +2,11 @@
 
 import dynamic from 'next/dynamic';
 
-const DiagramEditor = dynamic(() => import('@/components/editor/DiagramEditor'), { ssr: false });
+// The library reads IndexedDB, which only exists in the browser.
+const Library = dynamic(() => import('@/components/library/Library').then((m) => m.Library), {
+  ssr: false,
+});
 
-export default function Home() {
-  return <DiagramEditor />;
+export default function LibraryPage() {
+  return <Library />;
 }

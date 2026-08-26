@@ -5,7 +5,7 @@ import { contentBBox } from '@/lib/engine';
 import { canvasTheme, providerColors } from '@/lib/design/tokens';
 import { visibleBox } from '@/lib/editor/viewport';
 import { useEditor } from '../EditorProvider';
-import { CloseIcon } from '../icons/ToolIcons';
+import { CloseIcon } from '@/components/icons/ToolIcons';
 
 const WIDTH = 190;
 const HEIGHT = 128;

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
+import { AppProviders } from '@/components/app/AppProviders';
 import './globals.css';
 
 export const metadata: Metadata = {
   title: 'AION Architecture Studio',
-  description: 'Professional cloud architecture diagram editor by AION Cloud',
+  description: 'Cloud architecture diagrams for developers: draw them or write them.',
 };
 
 export default function RootLayout({
@@ -12,8 +13,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body>{children}</body>
+    <html lang="es" suppressHydrationWarning>
+      <body>
+        <AppProviders>{children}</AppProviders>
+      </body>
     </html>
   );
 }

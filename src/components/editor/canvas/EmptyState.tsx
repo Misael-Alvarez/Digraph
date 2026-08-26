@@ -1,7 +1,7 @@
 'use client';
 
 import { useEditor } from '../EditorProvider';
-import { SearchIcon, TemplateIcon } from '../icons/ToolIcons';
+import { SearchIcon, TemplateIcon } from '@/components/icons/ToolIcons';
 
 /** Shown on a blank canvas: three ways to start, each one clickable. */
 export function EmptyState() {

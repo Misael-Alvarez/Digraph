@@ -3,7 +3,7 @@
 import { contentBBox } from '@/lib/engine';
 import { DEFAULT_VIEWPORT, fitToBox, zoomByAtCenter } from '@/lib/editor/viewport';
 import { useEditor } from '../EditorProvider';
-import { FitIcon, ZoomInIcon, ZoomOutIcon } from '../icons/ToolIcons';
+import { FitIcon, ZoomInIcon, ZoomOutIcon } from '@/components/icons/ToolIcons';
 
 export function ZoomControls({ size }: { size: { width: number; height: number } }) {
   const { doc, ui, dispatchUi, t } = useEditor();

@@ -184,6 +184,12 @@ export function useCommands(): CommandSet {
         run: () => dispatchUi({ type: 'toggleCode' }),
       },
       {
+        id: 'toggleVersions',
+        label: t('versions.title'),
+        icon: '⏱',
+        run: () => dispatchUi({ type: 'toggleVersions' }),
+      },
+      {
         id: 'toggleMinimap',
         label: t('action.toggleMinimap'),
         icon: '🗺',

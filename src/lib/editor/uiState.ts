@@ -19,6 +19,8 @@ export interface UiState {
   paletteOpen: boolean;
   /** Split code/canvas view. */
   codeOpen: boolean;
+  /** Version history panel. */
+  versionsOpen: boolean;
   inspectorPinned: boolean;
   modal: ModalKind;
   toast: string | null;
@@ -37,6 +39,7 @@ export const initialUiState: UiState = {
   minimapOpen: true,
   paletteOpen: false,
   codeOpen: false,
+  versionsOpen: false,
   inspectorPinned: false,
   modal: null,
   toast: null,
@@ -56,6 +59,7 @@ export type UiAction =
   | { type: 'setLocale'; locale: Locale }
   | { type: 'toggleMinimap' }
   | { type: 'toggleCode' }
+  | { type: 'toggleVersions' }
   | { type: 'setPaletteOpen'; open: boolean }
   | { type: 'toggleInspectorPinned' }
   | { type: 'setModal'; modal: ModalKind }
@@ -109,7 +113,11 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
       return { ...state, minimapOpen: !state.minimapOpen };
 
     case 'toggleCode':
-      return { ...state, codeOpen: !state.codeOpen };
+      // The two side panels share the same column, so only one can be open.
+      return { ...state, codeOpen: !state.codeOpen, versionsOpen: false };
+
+    case 'toggleVersions':
+      return { ...state, versionsOpen: !state.versionsOpen, codeOpen: false };
 
     case 'setPaletteOpen':
       return { ...state, paletteOpen: action.open };

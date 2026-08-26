@@ -14,7 +14,9 @@ import { matchServiceLabel, resolveService, type CloudPrefix } from '@/lib/dsl';
 export const AiBoundarySchema = z.object({
   id: z.string().describe('Short identifier, referenced by nodes.'),
   label: z.string().describe('Human name shown on the boundary header.'),
-  variant: z.enum(['outer', 'sub']).describe('"outer" for a cloud or VPC, "sub" for a zone inside one.'),
+  variant: z
+    .enum(['outer', 'sub'])
+    .describe('"outer" for a cloud or VPC, "sub" for a zone inside one.'),
 });
 
 export const AiNodeSchema = z.object({
@@ -68,7 +70,8 @@ export function aiToDsl(ai: AiDiagram): ConversionResult {
   const resolvedIds = new Set<string>();
 
   for (const node of ai.nodes) {
-    const key = resolveService(node.service, cloud) ?? matchServiceLabel(node.label || node.service, cloud);
+    const key =
+      resolveService(node.service, cloud) ?? matchServiceLabel(node.label || node.service, cloud);
     if (!key) {
       dropped.push(node.service);
       continue;

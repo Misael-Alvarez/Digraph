@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { openNewDiagram } from './helpers';
 
 /**
  * These run without an API key configured, which is the state a fresh checkout
@@ -6,11 +7,7 @@ import { expect, test } from '@playwright/test';
  * the message the user gets when the feature is unavailable.
  */
 test.beforeEach(async ({ page }) => {
-  await page.goto('/');
-  await page.waitForSelector('.canvas-surface');
-  await page.evaluate(() => localStorage.clear());
-  await page.reload();
-  await page.waitForSelector('.canvas-surface');
+  await openNewDiagram(page);
 });
 
 test('opens from the keyboard and from the palette', async ({ page }) => {

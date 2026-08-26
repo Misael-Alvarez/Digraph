@@ -16,7 +16,8 @@ vi.mock('@/lib/ai/client', async () => {
   const actual = await vi.importActual<typeof import('@/lib/ai/client')>('@/lib/ai/client');
   return {
     ...actual,
-    getClient: () => (clientEnabled ? { messages: { parse: parseMock, stream: streamMock } } : null),
+    getClient: () =>
+      clientEnabled ? { messages: { parse: parseMock, stream: streamMock } } : null,
   };
 });
 
@@ -109,7 +110,11 @@ describe('POST /api/ai/generate', () => {
 
   it('surfaces a refusal as its own status', async () => {
     parseMock.mockResolvedValue(
-      reply({ stop_reason: 'refusal', parsed_output: null, stop_details: { type: 'refusal', category: 'cyber' } }),
+      reply({
+        stop_reason: 'refusal',
+        parsed_output: null,
+        stop_details: { type: 'refusal', category: 'cyber' },
+      }),
     );
     const { POST } = await import('./generate/route');
 
@@ -217,7 +222,13 @@ describe('POST /api/ai/explain', () => {
 
   it('refuses to review an empty canvas', async () => {
     const { POST } = await import('./explain/route');
-    const empty = { schemaVersion: 1, canvas: { w: 10, h: 10 }, shapes: [], connectors: [], showFooter: false };
+    const empty = {
+      schemaVersion: 1,
+      canvas: { w: 10, h: 10 },
+      shapes: [],
+      connectors: [],
+      showFooter: false,
+    };
 
     const response = await POST(explainPost({ question: 'What is missing?', model: empty }));
     expect(response.status).toBe(400);
@@ -226,7 +237,9 @@ describe('POST /api/ai/explain', () => {
 
   it('rejects a malformed diagram', async () => {
     const { POST } = await import('./explain/route');
-    const response = await POST(explainPost({ question: 'What is missing?', model: { nope: true } }));
+    const response = await POST(
+      explainPost({ question: 'What is missing?', model: { nope: true } }),
+    );
     expect(response.status).toBe(400);
   });
 

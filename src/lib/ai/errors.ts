@@ -18,7 +18,11 @@ export function describeError(error: unknown): ApiFailure {
     return { status: 500, code: 'bad_key', message: 'The configured API key was rejected.' };
   }
   if (error instanceof Anthropic.PermissionDeniedError) {
-    return { status: 500, code: 'no_permission', message: 'The API key lacks access to this model.' };
+    return {
+      status: 500,
+      code: 'no_permission',
+      message: 'The API key lacks access to this model.',
+    };
   }
   if (error instanceof Anthropic.RateLimitError) {
     const retryAfter = Number(error.headers?.get?.('retry-after') ?? 30);

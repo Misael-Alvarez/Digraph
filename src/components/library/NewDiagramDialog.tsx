@@ -1,0 +1,89 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+import type { DiagramModel } from '@/lib/domain';
+import { createEmptyModel } from '@/lib/engine';
+import { TEMPLATES } from '@/lib/editor/templates';
+import type { MessageKey } from '@/lib/i18n/messages';
+import { CloseIcon } from '@/components/icons/ToolIcons';
+
+interface NewDiagramDialogProps {
+  onPick: (title: string, model: DiagramModel) => void;
+  onClose: () => void;
+  t: (key: MessageKey, values?: Record<string, string | number>) => string;
+}
+
+/**
+ * Choosing what a new diagram starts from.
+ *
+ * The empty-library screen offers the same choices inline, but that screen
+ * disappears the moment there is one diagram — which left starting from a
+ * template unreachable for everyone but a brand new user.
+ */
+export function NewDiagramDialog({ onPick, onClose, t }: NewDiagramDialogProps) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    ref.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="dialog-backdrop" onPointerDown={onClose}>
+      <div
+        ref={ref}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('library.new')}
+        className="dialog is-wide"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <header className="dialog-header">
+          <h2>{t('library.new')}</h2>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={t('modal.close')}
+            onClick={onClose}
+          >
+            <CloseIcon size={16} />
+          </button>
+        </header>
+        <div className="dialog-body">
+          <div className="library-templates">
+            <button
+              type="button"
+              className="template-card"
+              onClick={() => onPick(t('app.untitled'), createEmptyModel())}
+            >
+              <span className="template-icon">＋</span>
+              <span>
+                <b>{t('library.blank')}</b>
+                <small>{t('library.blankHint')}</small>
+              </span>
+            </button>
+            {TEMPLATES.map((template) => (
+              <button
+                key={template.id}
+                type="button"
+                className="template-card"
+                onClick={() => onPick(template.name, template.build())}
+              >
+                <span className="template-icon">{template.icon}</span>
+                <span>
+                  <b>{template.name}</b>
+                  <small>{template.description}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

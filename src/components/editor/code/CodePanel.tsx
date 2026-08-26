@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parseDsl, serializeDsl, toMermaid, type CloudPrefix, type Diagnostic } from '@/lib/dsl';
 import { useEditor } from '../EditorProvider';
-import { CloseIcon } from '../icons/ToolIcons';
+import { CloseIcon } from '@/components/icons/ToolIcons';
 import { CodeEditor } from './CodeEditor';
 
 /** How long to wait after the last keystroke before compiling. */
