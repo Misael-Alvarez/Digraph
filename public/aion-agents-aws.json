@@ -1,0 +1,856 @@
+{
+  "canvas": {
+    "w": 3000,
+    "h": 2000
+  },
+  "shapes": [
+    {
+      "id": "bd_1",
+      "type": "boundary",
+      "parentId": null,
+      "x": 340,
+      "y": 60,
+      "w": 2300,
+      "h": 1640,
+      "variant": "outer",
+      "title": "AWS Cloud",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-vpc"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "bd_2",
+      "type": "boundary",
+      "parentId": null,
+      "x": 400,
+      "y": 140,
+      "w": 2180,
+      "h": 260,
+      "variant": "sub",
+      "title": "Edge (CloudFront + WAFv2)",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-cloudfront"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "bd_3",
+      "type": "boundary",
+      "parentId": null,
+      "x": 400,
+      "y": 440,
+      "w": 700,
+      "h": 280,
+      "variant": "sub",
+      "title": "Public Subnet",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-vpc"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "bd_4",
+      "type": "boundary",
+      "parentId": null,
+      "x": 1160,
+      "y": 440,
+      "w": 1420,
+      "h": 600,
+      "variant": "sub",
+      "title": "Private Subnet \u2014 Compute (ECS Fargate)",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-fargate"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "bd_5",
+      "type": "boundary",
+      "parentId": null,
+      "x": 400,
+      "y": 1100,
+      "w": 1420,
+      "h": 280,
+      "variant": "sub",
+      "title": "Private Subnet \u2014 Data",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-rds"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "bd_6",
+      "type": "boundary",
+      "parentId": null,
+      "x": 1880,
+      "y": 1100,
+      "w": 700,
+      "h": 560,
+      "variant": "sub",
+      "title": "Security & Observability",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-iam"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_7",
+      "type": "group",
+      "parentId": null,
+      "x": 30,
+      "y": 220,
+      "w": 270,
+      "h": 190,
+      "manualSize": false,
+      "title": "Internet",
+      "fill": "#F8F9FA"
+    },
+    {
+      "id": "ctr_8",
+      "type": "container",
+      "parentId": "grp_7",
+      "x": 48,
+      "y": 284,
+      "w": 234,
+      "h": 124,
+      "fill": "#6B7280",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_9",
+      "type": "item",
+      "parentId": "ctr_8",
+      "x": 64,
+      "y": 300,
+      "w": 202,
+      "h": 92,
+      "order": 0,
+      "title": "Internet",
+      "subtitle": "Users \u00b7 WhatsApp \u00b7 Widget",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "gen-web"
+      },
+      "fill": "#F8F9FA"
+    },
+    {
+      "id": "grp_10",
+      "type": "group",
+      "parentId": null,
+      "x": 460,
+      "y": 195,
+      "w": 500,
+      "h": 170,
+      "manualSize": false,
+      "title": "CloudFront",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_11",
+      "type": "container",
+      "parentId": "grp_10",
+      "x": 478,
+      "y": 259,
+      "w": 464,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_12",
+      "type": "item",
+      "parentId": "ctr_11",
+      "x": 494,
+      "y": 275,
+      "w": 432,
+      "h": 92,
+      "order": 0,
+      "title": "CloudFront",
+      "subtitle": "TLS \u00b7 Cach\u00e9 est\u00e1ticos \u00b7 Origen \u00fanico",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-cloudfront"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_13",
+      "type": "group",
+      "parentId": null,
+      "x": 1040,
+      "y": 195,
+      "w": 500,
+      "h": 170,
+      "manualSize": false,
+      "title": "WAFv2",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_14",
+      "type": "container",
+      "parentId": "grp_13",
+      "x": 1058,
+      "y": 259,
+      "w": 464,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_15",
+      "type": "item",
+      "parentId": "ctr_14",
+      "x": 1074,
+      "y": 275,
+      "w": 432,
+      "h": 92,
+      "order": 0,
+      "title": "WAFv2",
+      "subtitle": "Rate limit \u00b7 Reglas gestionadas",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-waf"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_16",
+      "type": "group",
+      "parentId": null,
+      "x": 450,
+      "y": 500,
+      "w": 590,
+      "h": 180,
+      "manualSize": false,
+      "title": "ALB P\u00fablico",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_17",
+      "type": "container",
+      "parentId": "grp_16",
+      "x": 468,
+      "y": 564,
+      "w": 554,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_18",
+      "type": "item",
+      "parentId": "ctr_17",
+      "x": 484,
+      "y": 580,
+      "w": 522,
+      "h": 92,
+      "order": 0,
+      "title": "ALB P\u00fablico",
+      "subtitle": "Reglas por ruta: /api/* y /*",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-elb"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_19",
+      "type": "group",
+      "parentId": null,
+      "x": 1210,
+      "y": 500,
+      "w": 440,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 api",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_20",
+      "type": "container",
+      "parentId": "grp_19",
+      "x": 1228,
+      "y": 564,
+      "w": 404,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_21",
+      "type": "item",
+      "parentId": "ctr_20",
+      "x": 1244,
+      "y": 580,
+      "w": 372,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 api",
+      "subtitle": "NestJS \u00b7 Control Plane \u00b7 /api/*",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ecs"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_22",
+      "type": "group",
+      "parentId": null,
+      "x": 1710,
+      "y": 500,
+      "w": 440,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 web",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_23",
+      "type": "container",
+      "parentId": "grp_22",
+      "x": 1728,
+      "y": 564,
+      "w": 404,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_24",
+      "type": "item",
+      "parentId": "ctr_23",
+      "x": 1744,
+      "y": 580,
+      "w": 372,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 web",
+      "subtitle": "Next.js \u00b7 Console \u00b7 BFF",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ecs"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_25",
+      "type": "group",
+      "parentId": null,
+      "x": 2200,
+      "y": 500,
+      "w": 330,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECR",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_26",
+      "type": "container",
+      "parentId": "grp_25",
+      "x": 2218,
+      "y": 564,
+      "w": 294,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_27",
+      "type": "item",
+      "parentId": "ctr_26",
+      "x": 2234,
+      "y": 580,
+      "w": 262,
+      "h": 92,
+      "order": 0,
+      "title": "ECR",
+      "subtitle": "Im\u00e1genes + Retenci\u00f3n",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ecr"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_28",
+      "type": "group",
+      "parentId": null,
+      "x": 1400,
+      "y": 770,
+      "w": 480,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 ai",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_29",
+      "type": "container",
+      "parentId": "grp_28",
+      "x": 1418,
+      "y": 834,
+      "w": 444,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_30",
+      "type": "item",
+      "parentId": "ctr_29",
+      "x": 1434,
+      "y": 850,
+      "w": 412,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 ai",
+      "subtitle": "FastAPI \u00b7 RAG \u00b7 Sin ruta p\u00fablica",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-fargate"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_31",
+      "type": "group",
+      "parentId": null,
+      "x": 1210,
+      "y": 770,
+      "w": 160,
+      "h": 180,
+      "manualSize": false,
+      "title": "Cloud Map",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_32",
+      "type": "container",
+      "parentId": "grp_31",
+      "x": 1228,
+      "y": 834,
+      "w": 124,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_33",
+      "type": "item",
+      "parentId": "ctr_32",
+      "x": 1244,
+      "y": 850,
+      "w": 92,
+      "h": 92,
+      "order": 0,
+      "title": "Cloud Map",
+      "subtitle": "DNS privado: ai.<ns>:puerto",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-route53"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_34",
+      "type": "group",
+      "parentId": null,
+      "x": 450,
+      "y": 1160,
+      "w": 440,
+      "h": 180,
+      "manualSize": false,
+      "title": "RDS PostgreSQL",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_35",
+      "type": "container",
+      "parentId": "grp_34",
+      "x": 468,
+      "y": 1224,
+      "w": 404,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_36",
+      "type": "item",
+      "parentId": "ctr_35",
+      "x": 484,
+      "y": 1240,
+      "w": 372,
+      "h": 92,
+      "order": 0,
+      "title": "RDS PostgreSQL",
+      "subtitle": "Cifrado \u00b7 Multi-AZ \u00b7 RLS forzado",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-rds"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_37",
+      "type": "group",
+      "parentId": null,
+      "x": 960,
+      "y": 1160,
+      "w": 440,
+      "h": 180,
+      "manualSize": false,
+      "title": "ElastiCache Redis",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_38",
+      "type": "container",
+      "parentId": "grp_37",
+      "x": 978,
+      "y": 1224,
+      "w": 404,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_39",
+      "type": "item",
+      "parentId": "ctr_38",
+      "x": 994,
+      "y": 1240,
+      "w": 372,
+      "h": 92,
+      "order": 0,
+      "title": "ElastiCache Redis",
+      "subtitle": "Rate limit p\u00fablico \u00b7 Falla cerrado",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-elasticache"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_40",
+      "type": "group",
+      "parentId": null,
+      "x": 1930,
+      "y": 1160,
+      "w": 440,
+      "h": 180,
+      "manualSize": false,
+      "title": "S3 Object Lock",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_41",
+      "type": "container",
+      "parentId": "grp_40",
+      "x": 1948,
+      "y": 1224,
+      "w": 404,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_42",
+      "type": "item",
+      "parentId": "ctr_41",
+      "x": 1964,
+      "y": 1240,
+      "w": 372,
+      "h": 92,
+      "order": 0,
+      "title": "S3 Object Lock",
+      "subtitle": "COMPLIANCE \u00b7 KMS propia \u00b7 WORM",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-s3"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_43",
+      "type": "group",
+      "parentId": null,
+      "x": 1930,
+      "y": 1400,
+      "w": 440,
+      "h": 180,
+      "manualSize": false,
+      "title": "Secrets Manager",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_44",
+      "type": "container",
+      "parentId": "grp_43",
+      "x": 1948,
+      "y": 1464,
+      "w": 404,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_45",
+      "type": "item",
+      "parentId": "ctr_44",
+      "x": 1964,
+      "y": 1480,
+      "w": 372,
+      "h": 92,
+      "order": 0,
+      "title": "Secrets Manager",
+      "subtitle": "ARN \u2192 Task Def \u00b7 CMK",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-secretsmanager"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_46",
+      "type": "group",
+      "parentId": null,
+      "x": 2200,
+      "y": 770,
+      "w": 350,
+      "h": 180,
+      "manualSize": false,
+      "title": "CloudWatch",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_47",
+      "type": "container",
+      "parentId": "grp_46",
+      "x": 2218,
+      "y": 834,
+      "w": 314,
+      "h": 124,
+      "fill": "#FF9900",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_48",
+      "type": "item",
+      "parentId": "ctr_47",
+      "x": 2234,
+      "y": 850,
+      "w": 282,
+      "h": 92,
+      "order": 0,
+      "title": "CloudWatch",
+      "subtitle": "Log group por servicio \u00b7 Alertas",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-cloudwatch"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "grp_49",
+      "type": "group",
+      "parentId": null,
+      "x": 30,
+      "y": 520,
+      "w": 270,
+      "h": 190,
+      "manualSize": false,
+      "title": "GitHub Actions",
+      "fill": "#F8F9FA"
+    },
+    {
+      "id": "ctr_50",
+      "type": "container",
+      "parentId": "grp_49",
+      "x": 48,
+      "y": 584,
+      "w": 234,
+      "h": 124,
+      "fill": "#6B7280",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_51",
+      "type": "item",
+      "parentId": "ctr_50",
+      "x": 64,
+      "y": 600,
+      "w": 202,
+      "h": 92,
+      "order": 0,
+      "title": "GitHub Actions",
+      "subtitle": "OIDC \u00b7 Sin llaves de larga vida",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "gen-api"
+      },
+      "fill": "#F8F9FA"
+    }
+  ],
+  "connectors": [
+    {
+      "id": "cn_52",
+      "sourceId": "itm_9",
+      "targetId": "itm_12",
+      "label": "HTTPS",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_53",
+      "sourceId": "itm_12",
+      "targetId": "itm_15",
+      "label": "Inspecci\u00f3n",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_54",
+      "sourceId": "itm_12",
+      "targetId": "itm_18",
+      "label": "Solo CF \u2192 ALB",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_55",
+      "sourceId": "itm_18",
+      "targetId": "itm_21",
+      "label": "/api/*",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_56",
+      "sourceId": "itm_18",
+      "targetId": "itm_24",
+      "label": "/*",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_57",
+      "sourceId": "itm_21",
+      "targetId": "itm_30",
+      "label": "Service Discovery",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_58",
+      "sourceId": "itm_24",
+      "targetId": "itm_21",
+      "label": "BFF",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_59",
+      "sourceId": "itm_21",
+      "targetId": "itm_36",
+      "label": "SQL + RLS",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_60",
+      "sourceId": "itm_21",
+      "targetId": "itm_39",
+      "label": "Rate limit",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_61",
+      "sourceId": "itm_21",
+      "targetId": "itm_42",
+      "label": "Privacy Journal",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_62",
+      "sourceId": "itm_21",
+      "targetId": "itm_45",
+      "label": "ARN inject",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_63",
+      "sourceId": "itm_21",
+      "targetId": "itm_48",
+      "label": "Logs",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_64",
+      "sourceId": "itm_30",
+      "targetId": "itm_48",
+      "label": "Logs",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_65",
+      "sourceId": "itm_24",
+      "targetId": "itm_48",
+      "label": "Logs",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_66",
+      "sourceId": "itm_51",
+      "targetId": "itm_27",
+      "label": "Push image",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_67",
+      "sourceId": "itm_51",
+      "targetId": "itm_21",
+      "label": "Deploy OIDC",
+      "style": "dashed",
+      "waypoints": []
+    }
+  ],
+  "showFooter": true
+}

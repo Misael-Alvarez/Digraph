@@ -1,0 +1,107 @@
+import { describe, expect, it } from 'vitest';
+import { addConnector, addGroup, children, createEmptyModel, getShape } from '@/lib/engine';
+import { normaliseBox, previewDrag, previewResize, resolveDragSet, shapesInLasso } from './preview';
+
+function twoGroups() {
+  const m = createEmptyModel();
+  const a = addGroup(m, 0, 0);
+  const b = addGroup(m, 900, 0);
+  const items = m.shapes.filter((s) => s.type === 'item');
+  addConnector(m, items[0].id, items[1].id);
+  return { model: m, a, b, items };
+}
+
+describe('resolveDragSet', () => {
+  it('includes every descendant of the dragged shape', () => {
+    const { model, a } = twoGroups();
+    expect(resolveDragSet(model, [a.id]).size).toBe(3);
+  });
+
+  it('ignores unknown ids', () => {
+    const { model } = twoGroups();
+    expect(resolveDragSet(model, ['ghost']).size).toBe(0);
+  });
+});
+
+describe('previewDrag', () => {
+  it('offsets only the affected shapes', () => {
+    const { model, a, b } = twoGroups();
+    const preview = previewDrag(model, resolveDragSet(model, [a.id]), 50, 25);
+
+    expect(getShape(preview, a.id)!.x).toBe(50);
+    expect(getShape(preview, b.id)!.x).toBe(900);
+  });
+
+  it('leaves the original model untouched', () => {
+    const { model, a } = twoGroups();
+    const before = structuredClone(model);
+    previewDrag(model, resolveDragSet(model, [a.id]), 100, 100);
+    expect(model).toEqual(before);
+  });
+
+  it('shares unaffected shapes by reference instead of copying them', () => {
+    const { model, a, b } = twoGroups();
+    const preview = previewDrag(model, resolveDragSet(model, [a.id]), 10, 0);
+    // This is what keeps a drag cheap on a large diagram.
+    expect(preview.shapes.find((s) => s.id === b.id)).toBe(model.shapes.find((s) => s.id === b.id));
+  });
+
+  it('reroutes the connectors it touches', () => {
+    const { model, a } = twoGroups();
+    const preview = previewDrag(model, resolveDragSet(model, [a.id]), 0, 400);
+    expect(preview.connectors[0].waypoints).not.toEqual(model.connectors[0].waypoints);
+  });
+
+  it('returns the same model when nothing moves', () => {
+    const { model, a } = twoGroups();
+    expect(previewDrag(model, resolveDragSet(model, [a.id]), 0, 0)).toBe(model);
+    expect(previewDrag(model, new Set(), 10, 10)).toBe(model);
+  });
+});
+
+describe('previewResize', () => {
+  it('applies the new size and marks it manual', () => {
+    const { model, a } = twoGroups();
+    const preview = previewResize(model, a.id, 700, 400);
+    expect(getShape(preview, a.id)).toMatchObject({ w: 700, h: 400, manualSize: true });
+  });
+
+  it('relays out the children of a resized group', () => {
+    const { model, a } = twoGroups();
+    const container = children(model, a.id)[0];
+    const preview = previewResize(model, a.id, 700, 400);
+    expect(getShape(preview, container.id)!.w).toBeGreaterThan(container.w);
+  });
+
+  it('leaves the original model untouched', () => {
+    const { model, a } = twoGroups();
+    const before = structuredClone(model);
+    previewResize(model, a.id, 900, 600);
+    expect(model).toEqual(before);
+  });
+
+  it('ignores an unknown id', () => {
+    const { model } = twoGroups();
+    expect(previewResize(model, 'ghost', 100, 100)).toBe(model);
+  });
+});
+
+describe('lasso helpers', () => {
+  it('normalises a box dragged in any direction', () => {
+    const expected = { x: 10, y: 10, w: 90, h: 40 };
+    expect(normaliseBox({ x: 100, y: 50 }, { x: 10, y: 10 })).toEqual(expected);
+    expect(normaliseBox({ x: 10, y: 10 }, { x: 100, y: 50 })).toEqual(expected);
+  });
+
+  it('selects the shapes a lasso touches, skipping containers', () => {
+    const { model, a } = twoGroups();
+    const hits = shapesInLasso(model, { x: -10, y: -10, w: 600, h: 400 });
+    expect(hits).toContain(a.id);
+    expect(hits.every((id) => getShape(model, id)!.type !== 'container')).toBe(true);
+  });
+
+  it('selects nothing when the lasso is empty space', () => {
+    const { model } = twoGroups();
+    expect(shapesInLasso(model, { x: 5000, y: 5000, w: 100, h: 100 })).toEqual([]);
+  });
+});

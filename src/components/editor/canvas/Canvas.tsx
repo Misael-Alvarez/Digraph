@@ -1,0 +1,403 @@
+'use client';
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Shape } from '@/lib/domain';
+import * as E from '@/lib/engine';
+import { canvasTheme } from '@/lib/design/tokens';
+import { SERVICE_ICONS } from '@/data/serviceIcons';
+import { toCanvas, viewportTransform, visibleBox, zoomAt } from '@/lib/editor/viewport';
+import { useEditor } from '../EditorProvider';
+import { usePointerTools } from '../hooks/usePointerTools';
+import { Defs } from './Defs';
+import { DiagramScene } from './DiagramScene';
+import type { ShapeInteraction } from './shapes';
+import { EmptyState } from './EmptyState';
+
+const HANDLE = 9;
+
+export function Canvas() {
+  const { doc, ui, dispatch, dispatchUi, collisions, t } = useEditor();
+  const svgRef = useRef<SVGSVGElement>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [spaceHeld, setSpaceHeld] = useState(false);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const theme = canvasTheme(ui.dark);
+
+  const toLocal = useCallback((e: { clientX: number; clientY: number }) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    return { x: e.clientX - (rect?.left ?? 0), y: e.clientY - (rect?.top ?? 0) };
+  }, []);
+
+  const tools = usePointerTools({
+    model: doc.model,
+    viewport: ui.viewport,
+    gridSnap: ui.gridSnap,
+    selectedIds: ui.selectedIds,
+    toLocal,
+    onMoveShapes: (ids, dx, dy) => dispatch({ type: 'moveShapes', ids, dx, dy }),
+    onResizeShape: (id, w, h) => dispatch({ type: 'resizeShape', id, w, h }),
+    onLassoSelect: (ids) => dispatchUi({ type: 'select', ids }),
+    onViewportChange: (viewport) => dispatchUi({ type: 'setViewport', viewport }),
+  });
+
+  /* Track the element size so fit-to-view and culling know the viewport. */
+  useEffect(() => {
+    const el = svgRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setSize({ width: entry.contentRect.width, height: entry.contentRect.height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  /* Space temporarily switches to panning, the convention in every canvas tool. */
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.code !== 'Space') return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      e.preventDefault();
+      setSpaceHeld(true);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.code === 'Space') setSpaceHeld(false);
+    };
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+    };
+  }, []);
+
+  /* Wheel: pinch or ctrl zooms at the cursor, plain wheel pans.
+     Bound to the host rather than the SVG so that overlays sitting above the
+     canvas — the empty state's buttons, for one — cannot swallow the gesture. */
+  useEffect(() => {
+    const el = hostRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const local = toLocal(e);
+      if (e.ctrlKey || e.metaKey) {
+        const factor = Math.exp(-e.deltaY / 240);
+        dispatchUi({
+          type: 'setViewport',
+          viewport: zoomAt(ui.viewport, ui.viewport.zoom * factor, local),
+        });
+      } else {
+        dispatchUi({
+          type: 'setViewport',
+          viewport: { ...ui.viewport, x: ui.viewport.x - e.deltaX, y: ui.viewport.y - e.deltaY },
+        });
+      }
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [ui.viewport, dispatchUi, toLocal]);
+
+  const model = tools.previewModel;
+
+  /* Only paint what is on screen. */
+  const visible = useMemo(() => {
+    if (!size.width || !size.height) return null;
+    const box = visibleBox(ui.viewport, size);
+    return E.inflate(box, 200);
+  }, [ui.viewport, size]);
+
+  const culledModel = useMemo(() => {
+    if (!visible || model.shapes.length < 60) return model;
+    const kept = model.shapes.filter((s) => E.rectsOverlap(E.bbox(s), visible));
+    if (kept.length === model.shapes.length) return model;
+    return { ...model, shapes: kept };
+  }, [model, visible]);
+
+  const snap = useCallback(
+    (value: number) => (ui.gridSnap ? E.snapToGrid(value) : value),
+    [ui.gridSnap],
+  );
+
+  const onBackgroundPointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.button === 1 || spaceHeld || ui.tool === 'pan') {
+        e.preventDefault();
+        tools.startPan(e);
+        return;
+      }
+      if (e.button !== 0) return;
+
+      const point = toCanvas(ui.viewport, toLocal(e));
+      switch (ui.tool) {
+        case 'boundary':
+          dispatch({ type: 'addBoundary', x: snap(point.x), y: snap(point.y), variant: 'outer' });
+          dispatchUi({ type: 'setTool', tool: 'select' });
+          break;
+        case 'subboundary':
+          dispatch({ type: 'addBoundary', x: snap(point.x), y: snap(point.y), variant: 'sub' });
+          dispatchUi({ type: 'setTool', tool: 'select' });
+          break;
+        case 'group':
+          dispatch({ type: 'addGroup', x: snap(point.x), y: snap(point.y) });
+          dispatchUi({ type: 'setTool', tool: 'select' });
+          break;
+        default:
+          dispatchUi({ type: 'clearSelection' });
+          tools.startLasso(e);
+      }
+    },
+    [ui.tool, ui.viewport, spaceHeld, tools, dispatch, dispatchUi, snap, toLocal],
+  );
+
+  const onShapePointerDown = useCallback(
+    (e: React.PointerEvent, id: string) => {
+      if (ui.tool !== 'select' || spaceHeld || e.button !== 0) return;
+      e.stopPropagation();
+      if (!e.shiftKey && !ui.selectedIds.has(id)) dispatchUi({ type: 'select', ids: [id] });
+      if (e.shiftKey) dispatchUi({ type: 'toggleSelected', id });
+      tools.startDrag(e, id);
+    },
+    [ui.tool, ui.selectedIds, spaceHeld, tools, dispatchUi],
+  );
+
+  const onShapeClick = useCallback(
+    (e: React.MouseEvent, id: string) => {
+      e.stopPropagation();
+      const shape = E.getShape(doc.model, id);
+
+      if (ui.tool === 'connector') {
+        if (!ui.connectorSourceId) dispatchUi({ type: 'setConnectorSource', id });
+        else if (ui.connectorSourceId !== id) {
+          dispatch({ type: 'addConnector', sourceId: ui.connectorSourceId, targetId: id });
+          dispatchUi({ type: 'setConnectorSource', id: null });
+        }
+        return;
+      }
+
+      if (ui.tool === 'item') {
+        if (shape?.type === 'container') dispatch({ type: 'addItem', containerId: id });
+        else if (shape?.type === 'group') {
+          const container = E.children(doc.model, id).find((s) => s.type === 'container');
+          if (container) dispatch({ type: 'addItem', containerId: container.id });
+        }
+        return;
+      }
+
+      if (ui.tool === 'select' && !e.shiftKey) dispatchUi({ type: 'select', ids: [id] });
+    },
+    [ui.tool, ui.connectorSourceId, doc.model, dispatch, dispatchUi],
+  );
+
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const key = e.dataTransfer.getData('text/plain');
+      const service = SERVICE_ICONS.find((s) => s.key === key);
+      if (!service) return;
+      const point = toCanvas(ui.viewport, toLocal(e));
+      dispatch({
+        type: 'addGroup',
+        x: snap(point.x - 120),
+        y: snap(point.y - 60),
+        service: {
+          key: service.key,
+          label: service.label,
+          description: service.description,
+          category: service.category,
+        },
+      });
+    },
+    [ui.viewport, dispatch, snap, toLocal],
+  );
+
+  const interactionFor = useCallback(
+    (shape: Shape): ShapeInteraction => ({
+      selected: ui.selectedIds.has(shape.id),
+      colliding: collisions.has(shape.id),
+      isConnectorSource: ui.connectorSourceId === shape.id,
+      onPointerDown: onShapePointerDown,
+      onClick: onShapeClick,
+      onDoubleClick: (e, id) => {
+        // The old editor floated an <input> over the canvas. Selecting the shape
+        // and focusing the inspector's first field does the same job with one
+        // text input in the app instead of two.
+        e.stopPropagation();
+        dispatchUi({ type: 'select', ids: [id] });
+        requestAnimationFrame(() => {
+          document.querySelector<HTMLInputElement>('.inspector .input')?.select();
+        });
+      },
+      onContextMenu: (e, id) => {
+        e.preventDefault();
+        dispatchUi({ type: 'select', ids: [id] });
+      },
+    }),
+    [
+      ui.selectedIds,
+      ui.connectorSourceId,
+      collisions,
+      onShapePointerDown,
+      onShapeClick,
+      dispatchUi,
+    ],
+  );
+
+  const selectedShapes = useMemo(
+    () => model.shapes.filter((s) => ui.selectedIds.has(s.id)),
+    [model.shapes, ui.selectedIds],
+  );
+
+  const cursor =
+    spaceHeld || ui.tool === 'pan' ? 'grab' : ui.tool === 'select' ? 'default' : 'crosshair';
+
+  return (
+    <div
+      ref={hostRef}
+      className="canvas-host"
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={onDrop}
+    >
+      <svg
+        ref={svgRef}
+        className="canvas-surface"
+        style={{ cursor, background: theme.sheet }}
+        onPointerDown={onBackgroundPointerDown}
+        onContextMenu={(e) => e.preventDefault()}
+        role="application"
+        aria-label={t('app.title')}
+      >
+        <Defs theme={theme} />
+        {ui.gridSnap && (
+          <>
+            <pattern
+              id="grid-dots"
+              width={E.G.SNAP_SIZE * ui.viewport.zoom}
+              height={E.G.SNAP_SIZE * ui.viewport.zoom}
+              patternUnits="userSpaceOnUse"
+              x={ui.viewport.x}
+              y={ui.viewport.y}
+            >
+              <circle cx={1} cy={1} r={1} fill={theme.grid} />
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#grid-dots)" opacity={0.75} />
+          </>
+        )}
+
+        <g transform={viewportTransform(ui.viewport)}>
+          <DiagramScene
+            model={culledModel}
+            theme={theme}
+            interactionFor={interactionFor}
+            connectorInteraction={{
+              selectedId: ui.selectedConnectorId,
+              onClick: (e, id) => {
+                e.stopPropagation();
+                dispatchUi({ type: 'selectConnector', id });
+              },
+              onContextMenu: (e, id) => {
+                e.preventDefault();
+                dispatchUi({ type: 'selectConnector', id });
+              },
+            }}
+          />
+
+          {/* Editor chrome. Deliberately outside DiagramScene so exports and
+              embeds cannot pick it up — that was the black-rectangle bug. */}
+          <g className="canvas-overlay" pointerEvents="none">
+            {tools.guides.map((guide, i) =>
+              guide.axis === 'x' ? (
+                <line
+                  key={`gx-${i}`}
+                  x1={guide.pos}
+                  y1={visible ? visible.y : -10_000}
+                  x2={guide.pos}
+                  y2={visible ? visible.y + visible.h : 10_000}
+                  className="align-guide"
+                />
+              ) : (
+                <line
+                  key={`gy-${i}`}
+                  x1={visible ? visible.x : -10_000}
+                  y1={guide.pos}
+                  x2={visible ? visible.x + visible.w : 10_000}
+                  y2={guide.pos}
+                  className="align-guide"
+                />
+              ),
+            )}
+
+            {model.shapes
+              .filter((s) => collisions.has(s.id))
+              .map((s) => (
+                <rect
+                  key={`c-${s.id}`}
+                  x={s.x}
+                  y={s.y}
+                  width={s.w}
+                  height={s.h}
+                  rx={8}
+                  className="collision-outline"
+                />
+              ))}
+
+            {selectedShapes.map((s) => (
+              <rect
+                key={`s-${s.id}`}
+                x={s.x - 1}
+                y={s.y - 1}
+                width={s.w + 2}
+                height={s.h + 2}
+                rx={9}
+                className="selection-outline"
+              />
+            ))}
+
+            {ui.connectorSourceId &&
+              (() => {
+                const source = E.getShape(model, ui.connectorSourceId);
+                if (!source) return null;
+                return (
+                  <rect
+                    x={source.x - 2}
+                    y={source.y - 2}
+                    width={source.w + 4}
+                    height={source.h + 4}
+                    rx={10}
+                    className="connector-source"
+                  />
+                );
+              })()}
+
+            {tools.lassoBox && (
+              <rect
+                x={tools.lassoBox.x}
+                y={tools.lassoBox.y}
+                width={tools.lassoBox.w}
+                height={tools.lassoBox.h}
+                className="lasso"
+              />
+            )}
+          </g>
+
+          {/* Resize handle, only for a single selection of a sizeable shape. */}
+          {selectedShapes.length === 1 && selectedShapes[0].type !== 'container' && (
+            <rect
+              x={selectedShapes[0].x + selectedShapes[0].w - HANDLE / 2}
+              y={selectedShapes[0].y + selectedShapes[0].h - HANDLE / 2}
+              width={HANDLE}
+              height={HANDLE}
+              rx={2}
+              className="resize-handle"
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                tools.startResize(e, selectedShapes[0].id);
+              }}
+            />
+          )}
+        </g>
+      </svg>
+
+      {doc.model.shapes.length === 0 && <EmptyState />}
+    </div>
+  );
+}

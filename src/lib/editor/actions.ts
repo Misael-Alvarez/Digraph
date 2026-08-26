@@ -1,0 +1,41 @@
+import type { Connector, DiagramModel, Shape } from '@/lib/domain';
+import type { ClipboardPayload } from '@/lib/engine';
+import type { CloudTarget } from '@/data/cloudEquivalents';
+
+/**
+ * Domain-level editor actions.
+ *
+ * Every mutation of the diagram goes through one of these. There is deliberately
+ * no `setModel` action: a blanket replace would make undo history meaningless and
+ * force the whole model to be cloned on every keystroke, which is what the
+ * original editor did on each pointer move.
+ */
+export type EditorAction =
+  /** Replaces the document wholesale and clears history (open, template, import). */
+  | { type: 'load'; model: DiagramModel }
+  | { type: 'addBoundary'; x: number; y: number; variant: 'outer' | 'sub' }
+  | {
+      type: 'addGroup';
+      x: number;
+      y: number;
+      service?: { key: string; label: string; description?: string; category: string };
+    }
+  | { type: 'addItem'; containerId: string }
+  | { type: 'deleteShapes'; ids: string[] }
+  | { type: 'moveShapes'; ids: string[]; dx: number; dy: number }
+  | { type: 'resizeShape'; id: string; w: number; h: number }
+  | { type: 'setShapeProps'; id: string; patch: Partial<Shape> }
+  | { type: 'reorderItem'; id: string; dir: 1 | -1 }
+  | { type: 'bringToFront'; id: string }
+  | { type: 'sendToBack'; id: string }
+  | { type: 'addConnector'; sourceId: string; targetId: string }
+  | { type: 'deleteConnector'; id: string }
+  | { type: 'setConnectorProps'; id: string; patch: Partial<Connector> }
+  | { type: 'paste'; payload: ClipboardPayload; offsetX: number; offsetY: number }
+  | { type: 'autoLayout' }
+  | { type: 'switchCloud'; target: CloudTarget }
+  | { type: 'switchShapeCloud'; id: string; target: CloudTarget }
+  | { type: 'undo' }
+  | { type: 'redo' };
+
+export type EditorDispatch = (action: EditorAction) => void;

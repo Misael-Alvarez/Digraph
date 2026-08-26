@@ -1,0 +1,887 @@
+{
+  "canvas": {
+    "w": 3000,
+    "h": 2000
+  },
+  "shapes": [
+    {
+      "id": "bd_1",
+      "type": "boundary",
+      "parentId": null,
+      "x": 350,
+      "y": 80,
+      "w": 2100,
+      "h": 1300,
+      "variant": "outer",
+      "title": "AWS Cloud",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ec2"
+      },
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "bd_2",
+      "type": "boundary",
+      "parentId": null,
+      "x": 400,
+      "y": 160,
+      "w": 980,
+      "h": 560,
+      "variant": "sub",
+      "title": "Public Subnet",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-vpc"
+      },
+      "fill": "#F0F6FF"
+    },
+    {
+      "id": "bd_3",
+      "type": "boundary",
+      "parentId": null,
+      "x": 1420,
+      "y": 160,
+      "w": 980,
+      "h": 560,
+      "variant": "sub",
+      "title": "Private Subnet",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-vpc"
+      },
+      "fill": "#FFF0F0"
+    },
+    {
+      "id": "bd_4",
+      "type": "boundary",
+      "parentId": null,
+      "x": 400,
+      "y": 780,
+      "w": 2000,
+      "h": 540,
+      "variant": "sub",
+      "title": "Data & AI Layer",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-sagemaker"
+      },
+      "fill": "#F8F0FF"
+    },
+    {
+      "id": "grp_5",
+      "type": "group",
+      "parentId": null,
+      "x": 60,
+      "y": 250,
+      "w": 260,
+      "h": 180,
+      "manualSize": false,
+      "title": "End Users",
+      "fill": "#F0F4FF"
+    },
+    {
+      "id": "ctr_6",
+      "type": "container",
+      "parentId": "grp_5",
+      "x": 78,
+      "y": 314,
+      "w": 224,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_7",
+      "type": "item",
+      "parentId": "ctr_6",
+      "x": 94,
+      "y": 330,
+      "w": 192,
+      "h": 92,
+      "order": 0,
+      "title": "End Users",
+      "subtitle": "Web & WhatsApp",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "gen-user"
+      },
+      "fill": "#E8EDFF"
+    },
+    {
+      "id": "grp_8",
+      "type": "group",
+      "parentId": null,
+      "x": 60,
+      "y": 480,
+      "w": 260,
+      "h": 180,
+      "manualSize": false,
+      "title": "WhatsApp",
+      "fill": "#E8FFE8"
+    },
+    {
+      "id": "ctr_9",
+      "type": "container",
+      "parentId": "grp_8",
+      "x": 78,
+      "y": 544,
+      "w": 224,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_10",
+      "type": "item",
+      "parentId": "ctr_9",
+      "x": 94,
+      "y": 560,
+      "w": 192,
+      "h": 92,
+      "order": 0,
+      "title": "WhatsApp",
+      "subtitle": "Meta Business API",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "gen-mobile"
+      },
+      "fill": "#D5F5D5"
+    },
+    {
+      "id": "grp_11",
+      "type": "group",
+      "parentId": null,
+      "x": 440,
+      "y": 220,
+      "w": 400,
+      "h": 180,
+      "manualSize": false,
+      "title": "CloudFront",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_12",
+      "type": "container",
+      "parentId": "grp_11",
+      "x": 458,
+      "y": 284,
+      "w": 364,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_13",
+      "type": "item",
+      "parentId": "ctr_12",
+      "x": 474,
+      "y": 300,
+      "w": 332,
+      "h": 92,
+      "order": 0,
+      "title": "CloudFront",
+      "subtitle": "CDN + WAF",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-cloudfront"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_14",
+      "type": "group",
+      "parentId": null,
+      "x": 440,
+      "y": 440,
+      "w": 400,
+      "h": 180,
+      "manualSize": false,
+      "title": "API Gateway",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_15",
+      "type": "container",
+      "parentId": "grp_14",
+      "x": 458,
+      "y": 504,
+      "w": 364,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_16",
+      "type": "item",
+      "parentId": "ctr_15",
+      "x": 474,
+      "y": 520,
+      "w": 332,
+      "h": 92,
+      "order": 0,
+      "title": "API Gateway",
+      "subtitle": "REST API + Rate Limiting",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-apigateway"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_17",
+      "type": "group",
+      "parentId": null,
+      "x": 900,
+      "y": 220,
+      "w": 400,
+      "h": 180,
+      "manualSize": false,
+      "title": "Cognito",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_18",
+      "type": "container",
+      "parentId": "grp_17",
+      "x": 918,
+      "y": 284,
+      "w": 364,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_19",
+      "type": "item",
+      "parentId": "ctr_18",
+      "x": 934,
+      "y": 300,
+      "w": 332,
+      "h": 92,
+      "order": 0,
+      "title": "Cognito",
+      "subtitle": "Auth + MFA + Sessions",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-cognito"
+      },
+      "fill": "#FFE8E0"
+    },
+    {
+      "id": "grp_20",
+      "type": "group",
+      "parentId": null,
+      "x": 1460,
+      "y": 220,
+      "w": 420,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 API",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_21",
+      "type": "container",
+      "parentId": "grp_20",
+      "x": 1478,
+      "y": 284,
+      "w": 384,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_22",
+      "type": "item",
+      "parentId": "ctr_21",
+      "x": 1494,
+      "y": 300,
+      "w": 352,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 API",
+      "subtitle": "NestJS \u00b7 Control Plane",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ecs"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_23",
+      "type": "group",
+      "parentId": null,
+      "x": 1460,
+      "y": 440,
+      "w": 420,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 Web",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_24",
+      "type": "container",
+      "parentId": "grp_23",
+      "x": 1478,
+      "y": 504,
+      "w": 384,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_25",
+      "type": "item",
+      "parentId": "ctr_24",
+      "x": 1494,
+      "y": 520,
+      "w": 352,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 Web",
+      "subtitle": "Next.js \u00b7 BFF Console",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ecs"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_26",
+      "type": "group",
+      "parentId": null,
+      "x": 1940,
+      "y": 220,
+      "w": 420,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 Widget",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_27",
+      "type": "container",
+      "parentId": "grp_26",
+      "x": 1958,
+      "y": 284,
+      "w": 384,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_28",
+      "type": "item",
+      "parentId": "ctr_27",
+      "x": 1974,
+      "y": 300,
+      "w": 352,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 Widget",
+      "subtitle": "Chat Embeddable",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ecs"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_29",
+      "type": "group",
+      "parentId": null,
+      "x": 440,
+      "y": 850,
+      "w": 450,
+      "h": 180,
+      "manualSize": false,
+      "title": "RDS PostgreSQL",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_30",
+      "type": "container",
+      "parentId": "grp_29",
+      "x": 458,
+      "y": 914,
+      "w": 414,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_31",
+      "type": "item",
+      "parentId": "ctr_30",
+      "x": 474,
+      "y": 930,
+      "w": 382,
+      "h": 92,
+      "order": 0,
+      "title": "RDS PostgreSQL",
+      "subtitle": "48 tables \u00b7 RLS \u00b7 Multi-tenant",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-rds"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_32",
+      "type": "group",
+      "parentId": null,
+      "x": 940,
+      "y": 850,
+      "w": 420,
+      "h": 180,
+      "manualSize": false,
+      "title": "S3",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_33",
+      "type": "container",
+      "parentId": "grp_32",
+      "x": 958,
+      "y": 914,
+      "w": 384,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_34",
+      "type": "item",
+      "parentId": "ctr_33",
+      "x": 974,
+      "y": 930,
+      "w": 352,
+      "h": 92,
+      "order": 0,
+      "title": "S3",
+      "subtitle": "Documents & Knowledge Base",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-s3"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_35",
+      "type": "group",
+      "parentId": null,
+      "x": 1420,
+      "y": 850,
+      "w": 480,
+      "h": 180,
+      "manualSize": false,
+      "title": "ECS \u2014 AI Service",
+      "fill": "#F8F0FF"
+    },
+    {
+      "id": "ctr_36",
+      "type": "container",
+      "parentId": "grp_35",
+      "x": 1438,
+      "y": 914,
+      "w": 444,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_37",
+      "type": "item",
+      "parentId": "ctr_36",
+      "x": 1454,
+      "y": 930,
+      "w": 412,
+      "h": 92,
+      "order": 0,
+      "title": "ECS \u2014 AI Service",
+      "subtitle": "FastAPI \u00b7 RAG + Grounding",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-fargate"
+      },
+      "fill": "#F0E0FF"
+    },
+    {
+      "id": "grp_38",
+      "type": "group",
+      "parentId": null,
+      "x": 1960,
+      "y": 850,
+      "w": 400,
+      "h": 180,
+      "manualSize": false,
+      "title": "Bedrock",
+      "fill": "#F8F0FF"
+    },
+    {
+      "id": "ctr_39",
+      "type": "container",
+      "parentId": "grp_38",
+      "x": 1978,
+      "y": 914,
+      "w": 364,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_40",
+      "type": "item",
+      "parentId": "ctr_39",
+      "x": 1994,
+      "y": 930,
+      "w": 332,
+      "h": 92,
+      "order": 0,
+      "title": "Bedrock",
+      "subtitle": "Foundation Models \u00b7 LLM",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-bedrock"
+      },
+      "fill": "#F0E0FF"
+    },
+    {
+      "id": "grp_41",
+      "type": "group",
+      "parentId": null,
+      "x": 440,
+      "y": 1080,
+      "w": 400,
+      "h": 180,
+      "manualSize": false,
+      "title": "SQS",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_42",
+      "type": "container",
+      "parentId": "grp_41",
+      "x": 458,
+      "y": 1144,
+      "w": 364,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_43",
+      "type": "item",
+      "parentId": "ctr_42",
+      "x": 474,
+      "y": 1160,
+      "w": 332,
+      "h": 92,
+      "order": 0,
+      "title": "SQS",
+      "subtitle": "Outbox \u00b7 Webhooks \u00b7 Events",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-sqs"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_44",
+      "type": "group",
+      "parentId": null,
+      "x": 900,
+      "y": 1080,
+      "w": 380,
+      "h": 180,
+      "manualSize": false,
+      "title": "SES",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_45",
+      "type": "container",
+      "parentId": "grp_44",
+      "x": 918,
+      "y": 1144,
+      "w": 344,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_46",
+      "type": "item",
+      "parentId": "ctr_45",
+      "x": 934,
+      "y": 1160,
+      "w": 312,
+      "h": 92,
+      "order": 0,
+      "title": "SES",
+      "subtitle": "Transactional Email",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-ses"
+      },
+      "fill": "#FFF0E0"
+    },
+    {
+      "id": "grp_47",
+      "type": "group",
+      "parentId": null,
+      "x": 1340,
+      "y": 1080,
+      "w": 450,
+      "h": 180,
+      "manualSize": false,
+      "title": "Secrets Manager",
+      "fill": "#FFE8E0"
+    },
+    {
+      "id": "ctr_48",
+      "type": "container",
+      "parentId": "grp_47",
+      "x": 1358,
+      "y": 1144,
+      "w": 414,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_49",
+      "type": "item",
+      "parentId": "ctr_48",
+      "x": 1374,
+      "y": 1160,
+      "w": 382,
+      "h": 92,
+      "order": 0,
+      "title": "Secrets Manager",
+      "subtitle": "API Keys \u00b7 Encryption Keys",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-secretsmanager"
+      },
+      "fill": "#FFD8C8"
+    },
+    {
+      "id": "grp_50",
+      "type": "group",
+      "parentId": null,
+      "x": 1840,
+      "y": 1080,
+      "w": 420,
+      "h": 180,
+      "manualSize": false,
+      "title": "CloudWatch",
+      "fill": "#FFF8F0"
+    },
+    {
+      "id": "ctr_51",
+      "type": "container",
+      "parentId": "grp_50",
+      "x": 1858,
+      "y": 1144,
+      "w": 384,
+      "h": 124,
+      "fill": "#9AA0A6",
+      "stacked_gap": "tight"
+    },
+    {
+      "id": "itm_52",
+      "type": "item",
+      "parentId": "ctr_51",
+      "x": 1874,
+      "y": 1160,
+      "w": 352,
+      "h": 92,
+      "order": 0,
+      "title": "CloudWatch",
+      "subtitle": "Logs \u00b7 Metrics \u00b7 Alarms",
+      "note": "",
+      "icon": {
+        "kind": "symbol",
+        "key": "aws-cloudwatch"
+      },
+      "fill": "#FFF0E0"
+    }
+  ],
+  "connectors": [
+    {
+      "id": "cn_53",
+      "sourceId": "itm_7",
+      "targetId": "itm_13",
+      "label": "HTTPS",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_54",
+      "sourceId": "itm_10",
+      "targetId": "itm_16",
+      "label": "Webhook",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_55",
+      "sourceId": "itm_13",
+      "targetId": "itm_16",
+      "label": "",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_56",
+      "sourceId": "itm_13",
+      "targetId": "itm_25",
+      "label": "SSR",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_57",
+      "sourceId": "itm_13",
+      "targetId": "itm_28",
+      "label": "Embed",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_58",
+      "sourceId": "itm_16",
+      "targetId": "itm_19",
+      "label": "Auth",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_59",
+      "sourceId": "itm_16",
+      "targetId": "itm_22",
+      "label": "REST",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_60",
+      "sourceId": "itm_25",
+      "targetId": "itm_22",
+      "label": "BFF",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_61",
+      "sourceId": "itm_28",
+      "targetId": "itm_22",
+      "label": "WS",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_62",
+      "sourceId": "itm_22",
+      "targetId": "itm_31",
+      "label": "SQL + RLS",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_63",
+      "sourceId": "itm_22",
+      "targetId": "itm_34",
+      "label": "Docs",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_64",
+      "sourceId": "itm_22",
+      "targetId": "itm_37",
+      "label": "Internal API",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_65",
+      "sourceId": "itm_22",
+      "targetId": "itm_43",
+      "label": "Outbox",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_66",
+      "sourceId": "itm_22",
+      "targetId": "itm_46",
+      "label": "Email",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_67",
+      "sourceId": "itm_22",
+      "targetId": "itm_49",
+      "label": "Keys",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_68",
+      "sourceId": "itm_37",
+      "targetId": "itm_34",
+      "label": "RAG Retrieval",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_69",
+      "sourceId": "itm_37",
+      "targetId": "itm_40",
+      "label": "LLM Inference",
+      "style": "solid",
+      "waypoints": []
+    },
+    {
+      "id": "cn_70",
+      "sourceId": "itm_22",
+      "targetId": "itm_52",
+      "label": "Logs",
+      "style": "dashed",
+      "waypoints": []
+    },
+    {
+      "id": "cn_71",
+      "sourceId": "itm_37",
+      "targetId": "itm_52",
+      "label": "Metrics",
+      "style": "dashed",
+      "waypoints": []
+    }
+  ],
+  "showFooter": true
+}
