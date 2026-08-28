@@ -133,7 +133,17 @@ export function SharedDiagram() {
         role="img"
         aria-label={t('share.title')}
         onPointerDown={(e) => {
+          // Primary button only, and the pointer is captured: a drag that ends
+          // outside the window used to leave the surface following the cursor
+          // for good, and a right-click panned the diagram behind its own menu.
+          if (e.button !== 0) return;
+          e.currentTarget.setPointerCapture(e.pointerId);
           dragging.current = { x: e.clientX, y: e.clientY, viewport };
+        }}
+        onPointerUp={(e) => {
+          if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+            e.currentTarget.releasePointerCapture(e.pointerId);
+          }
         }}
       >
         <Defs theme={theme} iconKeys={iconKeysIn(model)} />

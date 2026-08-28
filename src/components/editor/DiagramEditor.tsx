@@ -10,6 +10,7 @@ import { Canvas } from './canvas/Canvas';
 import { CodePanel } from './code/CodePanel';
 import { AiDialog } from './ai/AiDialog';
 import { CommandPalette } from './chrome/CommandPalette';
+import { InsightsPanel } from './chrome/InsightsPanel';
 import { InspectorPanel } from './chrome/InspectorPanel';
 import { Minimap } from './chrome/Minimap';
 import { Modals } from './chrome/Modals';
@@ -125,6 +126,7 @@ function EditorShell({
         </main>
         {ui.codeOpen && <CodePanel />}
         {ui.versionsOpen && <VersionPanel onSnapshot={onSnapshot} onRestored={onRestored} />}
+        {ui.insightsOpen && <InsightsPanel size={size} />}
       </div>
       <StatusBar status={status} />
 

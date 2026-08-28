@@ -189,3 +189,178 @@ export const TemplateIcon = (p: IconProps) => (
     <path d="M3 9h18M9 9v11" />
   </Icon>
 );
+
+/* ── Command palette, library and dialogs ─────────────────────────────
+   Everything below replaces a text glyph or an emoji that the palette and
+   the template cards used to print: ▣ ⧉ 🗺 ⚡ 🧠 render at a different size
+   and baseline on every platform and cannot take the current colour, so a
+   list of them never lined up with the SVG icons beside it. */
+
+export const SelectAllIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="3 2.5" />
+    <rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor" stroke="none" />
+  </Icon>
+);
+
+export const DeselectIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="3" width="18" height="18" rx="2" strokeDasharray="3 2.5" />
+  </Icon>
+);
+
+export const DuplicateIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="3" width="13" height="13" rx="2" />
+    <path d="M8 21h11a2 2 0 002-2V8" />
+  </Icon>
+);
+
+export const AutoLayoutIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="3" y="4" width="7" height="7" rx="1.5" />
+    <rect x="14" y="4" width="7" height="7" rx="1.5" />
+    <rect x="8.5" y="15" width="7" height="5" rx="1.5" />
+    <path d="M6.5 11v2.5h11V11M12 13.5V15" />
+  </Icon>
+);
+
+export const SparkleIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z" />
+    <path d="M18.5 15.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z" />
+  </Icon>
+);
+
+export const CodeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 6l-5 6 5 6M15 6l5 6-5 6" />
+  </Icon>
+);
+
+export const HistoryIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3.5 12a8.5 8.5 0 108.5-8.5A8.5 8.5 0 005.6 6.6" />
+    <path d="M3.5 3.5v3.5H7" />
+    <path d="M12 7.5V12l3 1.8" />
+  </Icon>
+);
+
+export const ShareIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 15V3.5M8.5 7L12 3.5 15.5 7" />
+    <path d="M4.5 13.5V19a2 2 0 002 2h11a2 2 0 002-2v-5.5" />
+  </Icon>
+);
+
+export const DownloadIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5V15M8.5 11.5L12 15l3.5-3.5" />
+    <path d="M4.5 15.5V19a2 2 0 002 2h11a2 2 0 002-2v-3.5" />
+  </Icon>
+);
+
+export const ImportIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 15V3.5M8.5 11.5L12 15l3.5-3.5" />
+    <path d="M3.5 15.5V19a2 2 0 002 2h13a2 2 0 002-2v-3.5" />
+    <path d="M3.5 8.5h4M16.5 8.5h4" />
+  </Icon>
+);
+
+export const FolderIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3 7a2 2 0 012-2h4l2 2.5h8a2 2 0 012 2V18a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+  </Icon>
+);
+
+export const SaveIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M5 3.5h11L20.5 8v11.5a1.5 1.5 0 01-1.5 1.5H5a1.5 1.5 0 01-1.5-1.5v-15A1.5 1.5 0 015 3.5z" />
+    <path d="M8 3.5v5h7M8 20v-5.5h8V20" />
+  </Icon>
+);
+
+export const KeyboardIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="2.5" y="6" width="19" height="12" rx="2" />
+    <path d="M6.5 9.5h.01M10 9.5h.01M13.5 9.5h.01M17 9.5h.01M8 14.5h8" strokeWidth={2.2} />
+  </Icon>
+);
+
+export const EraseIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7 21l-3.5-3.5a2 2 0 010-2.8L13 5.2a2 2 0 012.8 0l4.5 4.5a2 2 0 010 2.8L13.5 19.5" />
+    <path d="M21 21H8" />
+  </Icon>
+);
+
+export const ListIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 6.5h16M4 12h16M4 17.5h10" />
+  </Icon>
+);
+
+export const ArrowLeftIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M19 12H5M11 6l-6 6 6 6" />
+  </Icon>
+);
+
+export const ChevronDownIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M6 9.5l6 6 6-6" />
+  </Icon>
+);
+
+export const PlusIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 5v14M5 12h14" />
+  </Icon>
+);
+
+export const CheckIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4.5 12.5l5 5 10-11" />
+  </Icon>
+);
+
+/* Template glyphs — one per starting point, drawn in the same line idiom. */
+
+export const BoltIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M13.5 2.5L4.5 13.5h6l-.5 8 9-11h-6z" />
+  </Icon>
+);
+
+export const MeshIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="4.5" r="2.2" />
+    <circle cx="4.5" cy="17" r="2.2" />
+    <circle cx="19.5" cy="17" r="2.2" />
+    <path d="M10.4 6.3L6 14.9M13.6 6.3L18 14.9M6.7 17h10.6" />
+  </Icon>
+);
+
+export const ChartIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 20V4M4 20h16" />
+    <path d="M8 20v-6M12.5 20V9M17 20v-9.5" strokeWidth={2.4} />
+  </Icon>
+);
+
+export const BrainIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="7" cy="7" r="2.6" />
+    <circle cx="17" cy="7" r="2.6" />
+    <circle cx="12" cy="17" r="2.6" />
+    <path d="M9.6 7h4.8M8.3 9.3l2.4 5.4M15.7 9.3l-2.4 5.4" />
+  </Icon>
+);
+
+export const LayersIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3l8.5 4.5L12 12 3.5 7.5z" />
+    <path d="M3.5 12L12 16.5 20.5 12M3.5 16.5L12 21l8.5-4.5" />
+  </Icon>
+);

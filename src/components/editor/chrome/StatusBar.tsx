@@ -26,14 +26,19 @@ export function StatusBar({ status }: { status: SaveStatus }) {
 
   return (
     <footer className="statusbar">
-      <span className="statusbar-hint">{hint}</span>
+      <span className="statusbar-hint">
+        {/* The truncation lives on the text, not on the flex row: an
+            inline-flex box does not honour text-overflow itself. */}
+        <span className="statusbar-hint-text">{hint}</span>
+      </span>
       <span className="statusbar-meta">
         {t('status.shapes', { count: doc.model.shapes.length })}
       </span>
-      <span className="statusbar-meta">
+      <span className="statusbar-meta is-secondary">
         {t('status.connectors', { count: doc.model.connectors.length })}
       </span>
       <span className={`statusbar-meta save-status is-${status}`}>
+        <span className="save-dot" aria-hidden="true" />
         {t(
           status === 'saving'
             ? 'status.saving'

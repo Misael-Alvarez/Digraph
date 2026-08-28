@@ -19,6 +19,11 @@ export type Interaction =
       ids: string[];
       affected: Set<string>;
       origin: Point;
+      /** Where the gesture started on screen, so the threshold below means the
+          same distance at every zoom level. */
+      originScreen: Point;
+      /** Whether the pointer has gone far enough for this to be a drag at all. */
+      moved: boolean;
       dx: number;
       dy: number;
       guides: AlignGuide[];
@@ -51,7 +56,10 @@ interface Options {
 
 const MIN_SHAPE_W = 120;
 const MIN_SHAPE_H = 60;
-/** Below this a drag is treated as a click, so a sloppy click never nudges a shape. */
+/**
+ * Below this a drag is treated as a click, so a sloppy click never nudges a
+ * shape. Screen pixels: a hand is no steadier when the canvas is zoomed out.
+ */
 const DRAG_THRESHOLD = 3;
 
 export function usePointerTools({
@@ -134,6 +142,17 @@ export function usePointerTools({
     updateInteraction((state) => {
       switch (state.kind) {
         case 'drag': {
+          // Until the pointer has travelled far enough, the gesture is still a
+          // click: nothing moves and nothing is previewed. Snapping made this
+          // matter — a two-pixel wobble was enough to pull a shape onto the
+          // grid or onto a neighbour's edge, and the move was then committed.
+          if (
+            !state.moved &&
+            Math.abs(screen.x - state.originScreen.x) <= DRAG_THRESHOLD &&
+            Math.abs(screen.y - state.originScreen.y) <= DRAG_THRESHOLD
+          ) {
+            return state;
+          }
           const anchor = E.getShape(latest.current.model, state.ids[0]);
           if (!anchor) return state;
           let nextX = anchor.x + (point.x - state.origin.x);
@@ -153,7 +172,7 @@ export function usePointerTools({
             nextX = E.snapToGrid(nextX);
             nextY = E.snapToGrid(nextY);
           }
-          return { ...state, dx: nextX - anchor.x, dy: nextY - anchor.y, guides };
+          return { ...state, moved: true, dx: nextX - anchor.x, dy: nextY - anchor.y, guides };
         }
         case 'resize': {
           const w = Math.max(MIN_SHAPE_W, state.startW + (point.x - state.origin.x));
@@ -186,7 +205,7 @@ export function usePointerTools({
 
     switch (current.kind) {
       case 'drag':
-        if (Math.abs(current.dx) > 0 || Math.abs(current.dy) > 0) {
+        if (current.moved && (current.dx !== 0 || current.dy !== 0)) {
           // One action for the whole gesture, so one undo step.
           onMoveShapes(current.ids, current.dx, current.dy);
         }
@@ -198,7 +217,9 @@ export function usePointerTools({
         break;
       case 'lasso': {
         const box = normaliseBox(current.origin, current.current);
-        if (box.w > DRAG_THRESHOLD && box.h > DRAG_THRESHOLD) {
+        // The box is in canvas units, the threshold in screen pixels.
+        const minimum = DRAG_THRESHOLD / latest.current.viewport.zoom;
+        if (box.w > minimum && box.h > minimum) {
           onLassoSelect(shapesInLasso(latest.current.model, box));
         }
         break;
@@ -228,11 +249,14 @@ export function usePointerTools({
       if (!shape) return;
       // Dragging an unselected shape moves just that shape.
       const ids = selectedIds.has(id) ? [id, ...[...selectedIds].filter((x) => x !== id)] : [id];
+      const screen = toLocal(e);
       applyInteraction({
         kind: 'drag',
         ids,
         affected: resolveDragSet(model, ids),
-        origin: toCanvas(viewport, toLocal(e)),
+        origin: toCanvas(viewport, screen),
+        originScreen: screen,
+        moved: false,
         dx: 0,
         dy: 0,
         guides: [],

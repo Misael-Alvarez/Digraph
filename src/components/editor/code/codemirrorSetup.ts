@@ -3,8 +3,10 @@ import {
   type CompletionContext,
   type CompletionResult,
 } from '@codemirror/autocomplete';
+import { HighlightStyle } from '@codemirror/language';
 import { linter, type Diagnostic as CmDiagnostic } from '@codemirror/lint';
 import { EditorView } from '@codemirror/view';
+import { tags } from '@lezer/highlight';
 import { serviceCompletions, type CloudPrefix, type Diagnostic } from '@/lib/dsl';
 
 /**
@@ -96,3 +98,24 @@ export const editorTheme = EditorView.theme({
 });
 
 export { autocompletion };
+
+/**
+ * Syntax colours, as theme tokens.
+ *
+ * CodeMirror ships a light palette baked into its default highlight style. On
+ * the dark canvas that left every YAML key — the most structural token in the
+ * document — a dark navy on near-black, effectively invisible, while the values
+ * beside it were legible. Naming CSS variables here puts the code panel on the
+ * same switch as the rest of the app, and keeps one style rather than two.
+ */
+export const dslHighlight = HighlightStyle.define([
+  {
+    tag: [tags.propertyName, tags.definition(tags.propertyName), tags.attributeName],
+    color: 'var(--code-key)',
+  },
+  { tag: [tags.string, tags.attributeValue, tags.content], color: 'var(--code-string)' },
+  { tag: tags.number, color: 'var(--code-number)' },
+  { tag: [tags.keyword, tags.bool, tags.null, tags.atom], color: 'var(--code-keyword)' },
+  { tag: [tags.comment, tags.lineComment], color: 'var(--code-comment)', fontStyle: 'italic' },
+  { tag: [tags.punctuation, tags.separator, tags.bracket], color: 'var(--code-punct)' },
+]);

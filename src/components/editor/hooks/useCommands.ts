@@ -3,6 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { contentBBox, cloneShapes } from '@/lib/engine';
 import type { ServiceIcon } from '@/lib/editor';
+import { modKey } from '@/lib/editor/platform';
 import { downloadMarkdown, downloadPng, downloadProject, downloadSvg } from '@/lib/editor/export';
 import { DEFAULT_VIEWPORT, fitToBox } from '@/lib/editor/viewport';
 import { createEmptyModel } from '@/lib/engine';
@@ -12,6 +13,7 @@ export interface Command {
   id: string;
   label: string;
   /** Emoji or short glyph shown in the palette row. */
+  /** Name resolved by `<Glyph>`; the data lives in a .ts file, so no JSX here. */
   icon: string;
   shortcut?: string;
   enabled?: boolean;
@@ -22,9 +24,6 @@ export interface CommandSet extends Array<Command> {
   /** Drops a service onto the canvas at a sensible position. */
   addService: (service: ServiceIcon) => void;
 }
-
-const isMac = () => typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform);
-const mod = () => (isMac() ? '⌘' : 'Ctrl+');
 
 /**
  * Everything the command palette, the menus and the keyboard can trigger.
@@ -78,12 +77,12 @@ export function useCommands(): CommandSet {
   );
 
   const commands = useMemo<Command[]>(() => {
-    const m = mod();
+    const m = modKey();
     return [
       {
         id: 'undo',
         label: t('action.undo'),
-        icon: '↶',
+        icon: 'undo',
         shortcut: `${m}Z`,
         enabled: canUndo,
         run: () => dispatch({ type: 'undo' }),
@@ -91,7 +90,7 @@ export function useCommands(): CommandSet {
       {
         id: 'redo',
         label: t('action.redo'),
-        icon: '↷',
+        icon: 'redo',
         shortcut: `${m}⇧Z`,
         enabled: canRedo,
         run: () => dispatch({ type: 'redo' }),
@@ -99,7 +98,7 @@ export function useCommands(): CommandSet {
       {
         id: 'selectAll',
         label: t('action.selectAll'),
-        icon: '▣',
+        icon: 'selectAll',
         shortcut: `${m}A`,
         run: () =>
           dispatchUi({
@@ -111,14 +110,14 @@ export function useCommands(): CommandSet {
       {
         id: 'deselect',
         label: t('action.deselect'),
-        icon: '▢',
+        icon: 'deselect',
         shortcut: `${m}⇧A`,
         run: () => dispatchUi({ type: 'clearSelection' }),
       },
       {
         id: 'delete',
         label: t('action.delete'),
-        icon: '🗑',
+        icon: 'delete',
         shortcut: 'Del',
         enabled: ui.selectedIds.size > 0,
         run: () => {
@@ -129,7 +128,7 @@ export function useCommands(): CommandSet {
       {
         id: 'duplicate',
         label: t('action.duplicate'),
-        icon: '⧉',
+        icon: 'duplicate',
         shortcut: `${m}D`,
         enabled: ui.selectedIds.size > 0,
         run: () =>
@@ -143,13 +142,13 @@ export function useCommands(): CommandSet {
       {
         id: 'autoLayout',
         label: t('action.autoLayout'),
-        icon: '⌗',
+        icon: 'autoLayout',
         run: () => dispatch({ type: 'autoLayout' }),
       },
       {
         id: 'zoomFit',
         label: t('action.zoomFit'),
-        icon: '⤢',
+        icon: 'zoomFit',
         shortcut: `${m}1`,
         run: () =>
           dispatchUi({
@@ -160,90 +159,96 @@ export function useCommands(): CommandSet {
       {
         id: 'zoomReset',
         label: t('action.zoomReset'),
-        icon: '⊙',
+        icon: 'zoomReset',
         shortcut: `${m}0`,
         run: () => dispatchUi({ type: 'setViewport', viewport: DEFAULT_VIEWPORT }),
       },
       {
         id: 'toggleTheme',
         label: t('action.toggleTheme'),
-        icon: ui.dark ? '☀' : '☾',
+        icon: ui.dark ? 'sun' : 'moon',
         run: () => dispatchUi({ type: 'toggleDark' }),
+      },
+      {
+        id: 'insights',
+        label: t('action.insights'),
+        icon: 'chart',
+        run: () => dispatchUi({ type: 'toggleInsights' }),
       },
       {
         id: 'toggleGrid',
         label: t('action.toggleGrid'),
-        icon: '⋮⋮',
+        icon: 'grid',
         run: () => dispatchUi({ type: 'toggleGridSnap' }),
       },
       {
         id: 'toggleCode',
         label: t('action.toggleCode'),
-        icon: '{ }',
+        icon: 'code',
         shortcut: `${m}/`,
         run: () => dispatchUi({ type: 'toggleCode' }),
       },
       {
         id: 'toggleBrowser',
         label: t('action.browser'),
-        icon: '▦',
+        icon: 'browser',
         shortcut: `${m}B`,
         run: () => dispatchUi({ type: 'toggleBrowser' }),
       },
       {
         id: 'toggleVersions',
         label: t('versions.title'),
-        icon: '⏱',
+        icon: 'history',
         run: () => dispatchUi({ type: 'toggleVersions' }),
       },
       {
         id: 'toggleMinimap',
         label: t('action.toggleMinimap'),
-        icon: '🗺',
+        icon: 'minimap',
         run: () => dispatchUi({ type: 'toggleMinimap' }),
       },
       {
         id: 'ai',
         label: t('action.ai'),
-        icon: '✦',
+        icon: 'ai',
         shortcut: `${m}J`,
         run: () => dispatchUi({ type: 'setModal', modal: 'ai' }),
       },
       {
         id: 'templates',
         label: t('action.templates'),
-        icon: '▤',
+        icon: 'templates',
         run: () => dispatchUi({ type: 'setModal', modal: 'templates' }),
       },
       {
         id: 'switchCloud',
         label: t('action.switchCloud'),
-        icon: '☁',
+        icon: 'cloud',
         run: () => dispatchUi({ type: 'setModal', modal: 'switchCloud' }),
       },
       {
         id: 'importMarkdown',
         label: t('action.importMarkdown'),
-        icon: '↧',
+        icon: 'import',
         run: () => dispatchUi({ type: 'setModal', modal: 'markdown' }),
       },
       {
         id: 'share',
         label: t('action.share'),
-        icon: '⇪',
+        icon: 'share',
         shortcut: `${m}⇧S`,
         run: () => dispatchUi({ type: 'setModal', modal: 'share' }),
       },
       {
         id: 'exportSvg',
         label: t('action.exportSvg'),
-        icon: '↥',
+        icon: 'export',
         run: () => downloadSvg(exportOptions),
       },
       {
         id: 'exportPng',
         label: t('action.exportPng'),
-        icon: '↥',
+        icon: 'export',
         run: () => {
           void downloadPng(exportOptions).catch(() =>
             dispatchUi({ type: 'toast', message: t('status.error') }),
@@ -253,34 +258,34 @@ export function useCommands(): CommandSet {
       {
         id: 'exportMarkdown',
         label: t('action.exportMarkdown'),
-        icon: '↥',
+        icon: 'export',
         shortcut: `${m}E`,
         run: () => downloadMarkdown(doc.model),
       },
       {
         id: 'openProject',
         label: t('action.open'),
-        icon: '📂',
+        icon: 'open',
         run: () => document.querySelector<HTMLInputElement>('[data-open-project]')?.click(),
       },
       {
         id: 'saveProject',
         label: t('action.save'),
-        icon: '💾',
+        icon: 'save',
         shortcut: `${m}S`,
         run: () => downloadProject(doc.model),
       },
       {
         id: 'shortcuts',
         label: t('action.shortcuts'),
-        icon: '⌨',
+        icon: 'shortcuts',
         shortcut: '?',
         run: () => dispatchUi({ type: 'setModal', modal: 'shortcuts' }),
       },
       {
         id: 'clear',
         label: t('action.clear'),
-        icon: '⌫',
+        icon: 'clear',
         run: () => {
           dispatch({ type: 'load', model: createEmptyModel() });
           dispatchUi({ type: 'clearSelection' });

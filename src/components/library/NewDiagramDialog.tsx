@@ -5,7 +5,9 @@ import type { DiagramModel } from '@/lib/domain';
 import { createEmptyModel } from '@/lib/engine';
 import { TEMPLATES } from '@/lib/editor/templates';
 import type { MessageKey } from '@/lib/i18n/messages';
-import { CloseIcon } from '@/components/icons/ToolIcons';
+import { CloseIcon, PlusIcon } from '@/components/icons/ToolIcons';
+import { Glyph } from '@/components/icons/Glyph';
+import { useLiquidPointer } from '@/components/app/useLiquidPointer';
 
 interface NewDiagramDialogProps {
   onPick: (title: string, model: DiagramModel) => void;
@@ -21,6 +23,7 @@ interface NewDiagramDialogProps {
  * template unreachable for everyone but a brand new user.
  */
 export function NewDiagramDialog({ onPick, onClose, t }: NewDiagramDialogProps) {
+  const liquid = useLiquidPointer();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export function NewDiagramDialog({ onPick, onClose, t }: NewDiagramDialogProps) 
         aria-modal="true"
         aria-label={t('library.new')}
         className="dialog is-wide"
+        onPointerMove={liquid}
         onPointerDown={(e) => e.stopPropagation()}
       >
         <header className="dialog-header">
@@ -58,10 +62,12 @@ export function NewDiagramDialog({ onPick, onClose, t }: NewDiagramDialogProps) 
           <div className="library-templates">
             <button
               type="button"
-              className="template-card"
+              className="template-card is-blank"
               onClick={() => onPick(t('app.untitled'), createEmptyModel())}
             >
-              <span className="template-icon">＋</span>
+              <span className="template-icon">
+                <PlusIcon size={20} />
+              </span>
               <span>
                 <b>{t('library.blank')}</b>
                 <small>{t('library.blankHint')}</small>
@@ -74,7 +80,9 @@ export function NewDiagramDialog({ onPick, onClose, t }: NewDiagramDialogProps) 
                 className="template-card"
                 onClick={() => onPick(template.name, template.build())}
               >
-                <span className="template-icon">{template.icon}</span>
+                <span className="template-icon">
+                  <Glyph name={template.icon} size={20} />
+                </span>
                 <span>
                   <b>{template.name}</b>
                   <small>{template.description}</small>

@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { cloneShapes } from '@/lib/engine';
 import type { ToolMode } from '@/lib/editor';
 import { isTextEntryTarget } from '@/lib/editor/domFocus';
+import type { MessageKey } from '@/lib/i18n/messages';
 import { useEditor } from '../EditorProvider';
 import { useCommands } from './useCommands';
 
@@ -194,9 +195,20 @@ export function useKeyboard() {
 }
 
 /** Bindings shown in the shortcut sheet, kept next to the handler above. */
-export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description: string][] }[] = [
+/**
+ * The shortcut sheet's contents.
+ *
+ * `Mod` is written out rather than spelled: the sheet renders it through
+ * `shortcut()`, so the same table reads ⌘ on a Mac and Ctrl+ everywhere else.
+ * The group titles are message keys like everything else the reader sees — they
+ * were the last three English words in the Spanish build.
+ */
+export const SHORTCUT_GROUPS: {
+  titleKey: MessageKey;
+  items: [keys: string, description: MessageKey][];
+}[] = [
   {
-    title: 'Tools',
+    titleKey: 'shortcuts.tools',
     items: [
       ['V', 'tool.select'],
       ['B', 'tool.boundary'],
@@ -208,7 +220,7 @@ export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description
     ],
   },
   {
-    title: 'Edit',
+    titleKey: 'shortcuts.edit',
     items: [
       ['Mod+Z', 'action.undo'],
       ['Mod+Shift+Z', 'action.redo'],
@@ -220,7 +232,7 @@ export const SHORTCUT_GROUPS: { title: string; items: [keys: string, description
     ],
   },
   {
-    title: 'File & view',
+    titleKey: 'shortcuts.fileView',
     items: [
       ['Mod+K', 'palette.placeholder'],
       ['Mod+B', 'action.browser'],

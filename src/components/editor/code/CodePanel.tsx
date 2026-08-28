@@ -1,7 +1,14 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { parseDsl, serializeDsl, toMermaid, type CloudPrefix, type Diagnostic } from '@/lib/dsl';
+import {
+  CLOUD_PREFIXES,
+  parseDsl,
+  serializeDsl,
+  toMermaid,
+  type CloudPrefix,
+  type Diagnostic,
+} from '@/lib/dsl';
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
 import { CodeEditor } from './CodeEditor';
@@ -88,8 +95,9 @@ export function CodePanel() {
     [],
   );
 
+  /** The document's default cloud, which is what completion offers first. */
   const cloud = useMemo(() => {
-    const match = source.match(/^cloud:\s*(aws|azure|gcp)\s*$/m);
+    const match = source.match(new RegExp(`^cloud:\\s*(${CLOUD_PREFIXES.join('|')})\\s*$`, 'm'));
     return (match?.[1] as CloudPrefix | undefined) ?? undefined;
   }, [source]);
 
@@ -99,7 +107,7 @@ export function CodePanel() {
   const warningCount = diagnostics.filter((d) => d.severity === 'warning').length;
 
   return (
-    <aside className="code-panel" aria-label="Diagram as code">
+    <aside className="code-panel" aria-label={t('code.title')}>
       <header className="code-panel-header">
         <div className="segmented is-compact">
           {(['dsl', 'mermaid'] as const).map((option) => (
@@ -116,7 +124,7 @@ export function CodePanel() {
 
         <span className="code-panel-spacer" />
 
-        {format === 'mermaid' && <span className="code-badge is-muted">read-only</span>}
+        {format === 'mermaid' && <span className="code-badge is-muted">{t('code.readOnly')}</span>}
         {format === 'dsl' && errorCount > 0 && (
           <span className="code-badge is-error">{errorCount}</span>
         )}
@@ -157,7 +165,7 @@ export function CodePanel() {
       </div>
 
       {hasErrors && format === 'dsl' && (
-        <footer className="code-panel-footer" role="status">
+        <footer className="code-panel-footer panel-footer" role="status">
           {diagnostics.find((d) => d.severity === 'error')?.message}
         </footer>
       )}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { diffModels, type ChangeKind } from '@/lib/engine';
 import type { DiagramModel, DiagramVersion } from '@/lib/domain';
 import { useParams } from 'next/navigation';
 import { thumbnailDataUrl } from '@/lib/store/thumbnail';
@@ -9,6 +10,11 @@ import { useRepository } from '@/components/app/RepositoryProvider';
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
 import { useReturnFocusToCanvas } from '@/lib/editor/returnFocus';
+import { relativeDay } from '@/lib/i18n/relativeDay';
+import { MAX_VERSIONS_PER_DIAGRAM } from '@/lib/store/localRepository';
+
+/** The sign each kind of change wears, the way a diff has always written it. */
+const MARK: Record<ChangeKind, string> = { added: '+', removed: '−', changed: '~' };
 
 interface VersionPanelProps {
   onSnapshot: (model: DiagramModel) => void;
@@ -25,11 +31,12 @@ interface VersionPanelProps {
 export function VersionPanel({ onSnapshot, onRestored }: VersionPanelProps) {
   useReturnFocusToCanvas();
   const repository = useRepository();
-  const { doc, dispatch, dispatchUi, ui, t } = useEditor();
+  const { doc, dispatch, dispatchUi, t } = useEditor();
   const params = useParams<{ id: string }>();
   const diagramId = params?.id ?? '';
 
   const [versions, setVersions] = useState<DiagramVersion[]>([]);
+  const [comparing, setComparing] = useState<DiagramVersion | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
 
@@ -42,9 +49,76 @@ export function VersionPanel({ onSnapshot, onRestored }: VersionPanelProps) {
     }
   }, [repository, diagramId]);
 
+  // The list is re-read whenever the model changes, because that is when a new
+  // version may have been written. Debounced: without it every keystroke in the
+  // editor was one more read of the whole version store.
+  const loaded = useRef(false);
   useEffect(() => {
-    void refresh();
+    if (!loaded.current) {
+      loaded.current = true;
+      void refresh();
+      return;
+    }
+    const timer = setTimeout(() => void refresh(), 600);
+    return () => clearTimeout(timer);
   }, [refresh, doc.model]);
+
+  // Thumbnails are re-rendered SVGs, and a stored version's never changes. Kept
+  // out of the render path: this panel re-renders on every edit, and redrawing
+  // twenty previews per keystroke is felt as lag in the canvas, not here.
+  // The previews are of the diagram, which is paper — so they are paper too,
+  // whatever the panel around them is doing.
+  const currentThumb = useMemo(() => thumbnailDataUrl(renderThumbnail(doc.model)), [doc.model]);
+  const thumbs = useMemo(
+    () => new Map(versions.map((v) => [v.id, thumbnailDataUrl(renderThumbnail(v.model))])),
+    [versions],
+  );
+
+  /**
+   * Snapshots under the day they were taken.
+   *
+   * A flat column of times is unreadable past the first screen: the question a
+   * reader has is "where was I yesterday", and the answer has to be a heading
+   * rather than arithmetic on a timestamp. The list arrives newest first, so
+   * consecutive runs are all the grouping needs.
+   */
+  const groups = useMemo(() => {
+    const out: { label: string; items: DiagramVersion[] }[] = [];
+    for (const version of versions) {
+      const label = relativeDay(version.createdAt, t);
+      const last = out[out.length - 1];
+      if (last && last.label === label) last.items.push(version);
+      else out.push({ label, items: [version] });
+    }
+    return out;
+  }, [versions, t]);
+
+  /**
+   * What changed between a snapshot and where the diagram is now.
+   *
+   * Recomputed whenever either side moves, so the list stays true while you
+   * keep editing with the comparison open.
+   */
+  const diff = useMemo(
+    () => (comparing ? diffModels(comparing.model, doc.model) : null),
+    [comparing, doc.model],
+  );
+
+  // The canvas paints what the list is talking about. Cleared on the way out,
+  // including when the panel closes with a comparison still open.
+  useEffect(() => {
+    dispatchUi({
+      type: 'setDiffHighlight',
+      highlight: diff
+        ? {
+            added: diff.nodes.filter((n) => n.kind === 'added').map((n) => n.shape.id),
+            changed: diff.nodes.filter((n) => n.kind === 'changed').map((n) => n.shape.id),
+          }
+        : null,
+    });
+  }, [diff, dispatchUi]);
+
+  useEffect(() => () => dispatchUi({ type: 'setDiffHighlight', highlight: null }), [dispatchUi]);
 
   const restore = async (version: DiagramVersion) => {
     setBusy(true);
@@ -85,52 +159,144 @@ export function VersionPanel({ onSnapshot, onRestored }: VersionPanelProps) {
         </button>
       </header>
 
-      <div className="version-list">
-        <article className="version-row is-current">
-          <span className="version-thumb">
-            {/* eslint-disable-next-line @next/next/no-img-element -- inline SVG data URL */}
-            <img src={thumbnailDataUrl(renderThumbnail(doc.model, ui.dark))} alt="" />
-          </span>
-          <span className="version-meta">
-            <b>{t('versions.current')}</b>
-            <small>
-              {doc.model.shapes.length} · {doc.model.connectors.length}
-            </small>
-          </span>
-        </article>
+      {diff && comparing && (
+        <div className="version-list">
+          <header className="group-header">
+            {t('versions.comparing')}
+            <span className="group-count">
+              {new Date(comparing.createdAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
+          </header>
 
-        {loading && <p className="library-note">{t('library.loading')}</p>}
-        {!loading && versions.length === 0 && <p className="library-note">{t('versions.empty')}</p>}
+          {diff.identical && <p className="library-note">{t('diff.identical')}</p>}
 
-        {versions.map((version) => (
-          <article key={version.id} className="version-row">
+          {diff.nodes.length > 0 && (
+            <section>
+              <header className="group-header">
+                {t('diff.nodes')}
+                <span className="group-count">{diff.nodes.length}</span>
+              </header>
+              {diff.nodes.map((change) => (
+                <p
+                  key={`${change.kind}-${change.shape.id}`}
+                  className={`diff-row is-${change.kind}`}
+                >
+                  <span className="diff-mark" aria-hidden="true">
+                    {MARK[change.kind]}
+                  </span>
+                  <span>
+                    {change.shape.title || change.shape.icon?.key}
+                    {change.fields.length > 0 && <small> · {change.fields.join(', ')}</small>}
+                  </span>
+                </p>
+              ))}
+            </section>
+          )}
+
+          {diff.edges.length > 0 && (
+            <section>
+              <header className="group-header">
+                {t('diff.edges')}
+                <span className="group-count">{diff.edges.length}</span>
+              </header>
+              {diff.edges.map((change) => (
+                <p
+                  key={`${change.kind}-${change.connector.id}`}
+                  className={`diff-row is-${change.kind}`}
+                >
+                  <span className="diff-mark" aria-hidden="true">
+                    {MARK[change.kind]}
+                  </span>
+                  <span>
+                    {change.from} → {change.to}
+                    {change.fields.length > 0 && <small> · {change.fields.join(', ')}</small>}
+                  </span>
+                </p>
+              ))}
+            </section>
+          )}
+
+          <div className="version-compare-exit">
+            <button type="button" className="button is-small" onClick={() => setComparing(null)}>
+              {t('versions.exitCompare')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!comparing && (
+        <div className="version-list">
+          <article className="version-row is-current">
             <span className="version-thumb">
               {/* eslint-disable-next-line @next/next/no-img-element -- inline SVG data URL */}
-              <img src={thumbnailDataUrl(renderThumbnail(version.model, ui.dark))} alt="" />
+              <img src={currentThumb} alt="" />
             </span>
             <span className="version-meta">
-              <b>
-                {new Date(version.createdAt).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </b>
+              <b>{t('versions.current')}</b>
               <small>
-                {new Date(version.createdAt).toLocaleDateString()}
-                {version.label ? ` · ${version.label}` : ''}
+                {doc.model.shapes.length} · {doc.model.connectors.length}
               </small>
             </span>
-            <button
-              type="button"
-              className="button is-small"
-              disabled={busy}
-              onClick={() => void restore(version)}
-            >
-              {t('versions.restore')}
-            </button>
           </article>
-        ))}
-      </div>
+
+          {loading && <p className="library-note">{t('library.loading')}</p>}
+          {!loading && versions.length === 0 && (
+            <p className="library-note">{t('versions.empty')}</p>
+          )}
+
+          {groups.map((group) => (
+            <section key={group.label} className="version-group">
+              <header className="group-header">
+                {group.label}
+                <span className="group-count">{group.items.length}</span>
+              </header>
+              {group.items.map((version) => (
+                <article key={version.id} className="version-row">
+                  <span className="version-thumb">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- inline SVG data URL */}
+                    <img src={thumbs.get(version.id)} alt="" />
+                  </span>
+                  <span className="version-meta">
+                    <b>
+                      {new Date(version.createdAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </b>
+                    {version.label && <small>{version.label}</small>}
+                  </span>
+                  <button
+                    type="button"
+                    className="button is-small"
+                    onClick={() => setComparing(version)}
+                  >
+                    {t('versions.compare')}
+                  </button>
+                  <button
+                    type="button"
+                    className="button is-small"
+                    disabled={busy}
+                    onClick={() => void restore(version)}
+                  >
+                    {t('versions.restore')}
+                  </button>
+                </article>
+              ))}
+            </section>
+          ))}
+        </div>
+      )}
+
+      {/* The store keeps a bounded history. Saying so is the difference between
+          a timeline that ends and one that looks like it lost something. */}
+      {!comparing && versions.length > 0 && (
+        <footer className="panel-footer">
+          {t('versions.kept', { count: MAX_VERSIONS_PER_DIAGRAM })}
+        </footer>
+      )}
     </aside>
   );
 }

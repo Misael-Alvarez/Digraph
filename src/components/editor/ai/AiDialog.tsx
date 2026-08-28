@@ -4,20 +4,18 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AiError, requestDiagram, requestReview } from '@/lib/ai/requests';
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
+import { useLiquidPointer } from '@/components/app/useLiquidPointer';
 
 type Mode = 'build' | 'review';
 
+/** Starting points, in the reader's own language like everything else here. */
 const BUILD_EXAMPLES = [
-  'API serverless multi-región en AWS con caché y cola',
-  'Pipeline de datos: ingesta, transformación y almacén analítico',
-  'Aplicación de tres capas con alta disponibilidad',
-];
+  'ai.example.serverless',
+  'ai.example.pipeline',
+  'ai.example.threeTier',
+] as const;
 
-const REVIEW_QUESTIONS = [
-  '¿Qué le falta a esta arquitectura?',
-  '¿Dónde está el punto único de fallo?',
-  'Explícame el flujo de una petición',
-];
+const REVIEW_QUESTIONS = ['ai.question.missing', 'ai.question.spof', 'ai.question.flow'] as const;
 
 /**
  * Generation and review.
@@ -28,6 +26,7 @@ const REVIEW_QUESTIONS = [
  * streams for the same reason.
  */
 export function AiDialog() {
+  const liquid = useLiquidPointer();
   const { doc, ui, dispatch, dispatchUi, t } = useEditor();
   const [mode, setMode] = useState<Mode>('build');
   const [prompt, setPrompt] = useState('');
@@ -90,22 +89,23 @@ export function AiDialog() {
       if (caught instanceof AiError) {
         setError(caught.retryAfter ? `${caught.message} (${caught.retryAfter}s)` : caught.message);
       } else {
-        setError('The request failed.');
+        setError(t('ai.failed'));
       }
     } finally {
       if (!controller.signal.aborted) setBusy(false);
     }
-  }, [prompt, busy, mode, doc.model, hasDiagram, dispatch, dispatchUi]);
+  }, [prompt, busy, mode, doc.model, hasDiagram, dispatch, dispatchUi, t]);
 
   if (ui.modal !== 'ai') return null;
 
-  const examples = mode === 'build' ? BUILD_EXAMPLES : REVIEW_QUESTIONS;
+  const examples = (mode === 'build' ? BUILD_EXAMPLES : REVIEW_QUESTIONS).map((key) => t(key));
   const canRun = prompt.trim().length > 2 && !busy && (mode === 'build' || hasDiagram);
 
   return (
     <div className="dialog-backdrop" onPointerDown={close}>
       <div
         className="dialog is-wide"
+        onPointerMove={liquid}
         role="dialog"
         aria-modal="true"
         aria-label={t('ai.title')}

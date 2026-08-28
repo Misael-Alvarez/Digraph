@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MessageKey } from '@/lib/i18n/messages';
 import type { WorkspaceExport } from '@/lib/store';
+import { DownloadIcon, ImportIcon } from '@/components/icons/ToolIcons';
 import { useRepository } from '../app/RepositoryProvider';
 
 interface WorkspaceActionsProps {
@@ -22,36 +23,59 @@ export function WorkspaceActions({ onChanged, t }: WorkspaceActionsProps) {
   const repository = useRepository();
   const fileInput = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const clearing = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Says something for four seconds. Cleared on unmount, so a message that
+      outlives its component cannot set state on it. */
+  const say = useCallback((text: string) => {
+    setMessage(text);
+    if (clearing.current) clearTimeout(clearing.current);
+    clearing.current = setTimeout(() => setMessage(null), 4000);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (clearing.current) clearTimeout(clearing.current);
+    },
+    [],
+  );
 
   const download = async () => {
-    const dump = await repository.exportWorkspace();
-    const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `architecture-workspace-${dump.exportedAt.slice(0, 10)}.json`;
-    link.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    try {
+      const dump = await repository.exportWorkspace();
+      const blob = new Blob([JSON.stringify(dump, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `architecture-workspace-${dump.exportedAt.slice(0, 10)}.json`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    } catch {
+      // The import side has always reported its failures; a silent export is
+      // worse, because nothing appears in the downloads folder either.
+      say(t('toast.exportFailed'));
+    }
   };
 
   const upload = async (file: File) => {
     try {
       const parsed = JSON.parse(await file.text()) as WorkspaceExport;
       const count = await repository.importWorkspace(parsed);
-      setMessage(t('library.imported', { count }));
+      say(t('library.imported', { count }));
       await onChanged();
     } catch {
-      setMessage(t('toast.invalidFile'));
+      say(t('toast.invalidFile'));
     }
-    setTimeout(() => setMessage(null), 4000);
   };
 
   return (
     <>
       <button type="button" className="button" onClick={() => void download()}>
+        <DownloadIcon size={15} />
         {t('library.export')}
       </button>
       <button type="button" className="button" onClick={() => fileInput.current?.click()}>
+        <ImportIcon size={15} />
         {t('library.import')}
       </button>
       <input

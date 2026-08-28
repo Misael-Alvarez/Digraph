@@ -13,7 +13,9 @@ export function ZoomControls({ size }: { size: { width: number; height: number }
     dispatchUi({ type: 'setViewport', viewport });
 
   return (
-    <div className="zoom-controls" role="group" aria-label={t('action.zoomFit')}>
+    /* The group is the zoom cluster, not the fit button inside it: a screen
+       reader announced every control in here as part of "Fit to view". */
+    <div className="zoom-controls" role="group" aria-label="Zoom">
       <button
         type="button"
         className="icon-button"
@@ -27,9 +29,14 @@ export function ZoomControls({ size }: { size: { width: number; height: number }
         type="button"
         className="zoom-value"
         title={t('action.zoomReset')}
+        aria-label={t('action.zoomReset')}
         onClick={() => setViewport(DEFAULT_VIEWPORT)}
       >
-        {percent}%
+        {/* Keyed by the value: a fresh node each step, which is what gives the
+            readout its own little kick when the zoom changes. */}
+        <span key={percent} className="zoom-number tabular">
+          {percent}%
+        </span>
       </button>
       <button
         type="button"

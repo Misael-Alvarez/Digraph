@@ -4,25 +4,31 @@ import { useEffect, useRef, useState } from 'react';
 import { safeParseDiagramModel } from '@/lib/domain';
 import { TEMPLATES } from '@/lib/editor/templates';
 import { markdownToDiagram } from '@/lib/editor/markdownImport';
-import type { CloudTarget } from '@/data/cloudEquivalents';
+import { CLOUD_TARGETS } from '@/data/cloudEquivalents';
+import { CATEGORY_SHORT_LABELS } from '@/data/serviceIcons';
 import { providerColors } from '@/lib/design/tokens';
 import { useEditor } from '../EditorProvider';
 import { SHORTCUT_GROUPS } from '../hooks/useKeyboard';
-import type { MessageKey } from '@/lib/i18n/messages';
 import { CloseIcon } from '@/components/icons/ToolIcons';
+import { Glyph } from '@/components/icons/Glyph';
+import { useLiquidPointer } from '@/components/app/useLiquidPointer';
+import { modKey } from '@/lib/editor/platform';
 
 function Dialog({
   title,
   children,
   onClose,
+  closeLabel,
   wide,
 }: {
   title: string;
   children: React.ReactNode;
   onClose: () => void;
+  closeLabel: string;
   wide?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const liquid = useLiquidPointer();
   useEffect(() => ref.current?.focus(), []);
 
   return (
@@ -35,10 +41,11 @@ function Dialog({
         aria-label={title}
         className={`dialog${wide ? ' is-wide' : ''}`}
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerMove={liquid}
       >
         <header className="dialog-header">
           <h2>{title}</h2>
-          <button type="button" className="icon-button" aria-label="Close" onClick={onClose}>
+          <button type="button" className="icon-button" aria-label={closeLabel} onClick={onClose}>
             <CloseIcon size={16} />
           </button>
         </header>
@@ -54,21 +61,24 @@ export function Modals() {
 
   if (ui.modal === 'templates') {
     return (
-      <Dialog title={t('modal.templates.title')} onClose={close}>
+      <Dialog title={t('modal.templates.title')} onClose={close} closeLabel={t('modal.close')}>
         <p className="dialog-subtitle">{t('modal.templates.subtitle')}</p>
         <div className="template-grid">
-          {TEMPLATES.map((template) => (
+          {TEMPLATES.map((template, index) => (
             <button
               key={template.id}
               type="button"
               className="template-card"
+              style={{ '--i': index } as React.CSSProperties}
               onClick={() => {
                 dispatch({ type: 'load', model: template.build() });
                 dispatchUi({ type: 'clearSelection' });
                 close();
               }}
             >
-              <span className="template-icon">{template.icon}</span>
+              <span className="template-icon">
+                <Glyph name={template.icon} size={20} />
+              </span>
               <span>
                 <b>{template.name}</b>
                 <small>{template.description}</small>
@@ -83,26 +93,24 @@ export function Modals() {
   if (ui.modal === 'markdown') return <MarkdownDialog onClose={close} />;
 
   if (ui.modal === 'switchCloud') {
-    const clouds: { target: CloudTarget; label: string; color: string }[] = [
-      { target: 'aws', label: 'AWS', color: providerColors.aws },
-      { target: 'azure', label: 'Azure', color: providerColors.azure },
-      { target: 'gcp', label: 'GCP', color: providerColors.gcp },
-    ];
     return (
-      <Dialog title={t('action.switchCloud')} onClose={close}>
+      <Dialog title={t('action.switchCloud')} onClose={close} closeLabel={t('modal.close')}>
         <div className="cloud-grid">
-          {clouds.map(({ target, label, color }) => (
+          {/* Read from the equivalence table rather than listed here: it has
+              known five clouds since the catalogue grew, and this dialog went
+              on offering three. */}
+          {CLOUD_TARGETS.map((target) => (
             <button
               key={target}
               type="button"
               className="cloud-card"
-              style={{ '--chip-color': color } as React.CSSProperties}
+              style={{ '--chip-color': providerColors[target] } as React.CSSProperties}
               onClick={() => {
                 dispatch({ type: 'switchCloud', target });
                 close();
               }}
             >
-              {label}
+              {CATEGORY_SHORT_LABELS[target] ?? target.toUpperCase()}
             </button>
           ))}
         </div>
@@ -112,15 +120,19 @@ export function Modals() {
 
   if (ui.modal === 'shortcuts') {
     return (
-      <Dialog title={t('modal.shortcuts.title')} onClose={close} wide>
+      <Dialog title={t('modal.shortcuts.title')} onClose={close} closeLabel={t('modal.close')} wide>
         <div className="shortcut-groups">
           {SHORTCUT_GROUPS.map((group) => (
-            <div key={group.title}>
-              <h3 className="shortcut-group-title">{group.title}</h3>
+            <div key={group.titleKey}>
+              <h3 className="shortcut-group-title group-header">
+                {t(group.titleKey)}
+                <span className="group-count">{group.items.length}</span>
+              </h3>
               {group.items.map(([keys, key]) => (
                 <div key={keys} className="shortcut-row">
-                  <kbd>{keys}</kbd>
-                  <span>{t(key as MessageKey)}</span>
+                  {/* `Mod` is spelled for the platform the reader is on. */}
+                  <kbd>{keys.replace('Mod+', modKey())}</kbd>
+                  <span>{t(key)}</span>
                 </div>
               ))}
             </div>
@@ -149,7 +161,7 @@ API Gateway -> Lambda : invoke
 Lambda -> DynamoDB : R/W`;
 
   return (
-    <Dialog title={t('modal.markdown.title')} onClose={onClose} wide>
+    <Dialog title={t('modal.markdown.title')} onClose={onClose} closeLabel={t('modal.close')} wide>
       <p className="dialog-subtitle">{t('modal.markdown.subtitle')}</p>
       <pre className="dialog-example">{example}</pre>
       <textarea

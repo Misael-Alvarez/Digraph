@@ -7,10 +7,24 @@ import { createEmptyModel } from '@/lib/engine';
 import { TEMPLATES } from '@/lib/editor/templates';
 import { thumbnailDataUrl } from '@/lib/store/thumbnail';
 import { useLocale } from '@/lib/i18n/useLocale';
-import { DigraphLogo } from '@/components/brand/DigraphLogo';
+import { relativeDay } from '@/lib/i18n/relativeDay';
+import { AcGraphLogo } from '@/components/brand/AcGraphLogo';
 import { useRepository, useRepositoryReady } from '../app/RepositoryProvider';
 import { useUser } from '../app/AuthProvider';
-import { CopyIcon, SearchIcon, TemplateIcon, TrashIcon } from '@/components/icons/ToolIcons';
+import { useTheme } from '../app/useTheme';
+import {
+  CloseIcon,
+  CopyIcon,
+  FolderIcon,
+  MoonIcon,
+  PlusIcon,
+  SearchIcon,
+  SunIcon,
+  TemplateIcon,
+  TrashIcon,
+} from '@/components/icons/ToolIcons';
+import { Glyph } from '@/components/icons/Glyph';
+import { ConfirmDialog } from './ConfirmDialog';
 import { WorkspaceActions } from './WorkspaceActions';
 import { NewDiagramDialog } from './NewDiagramDialog';
 
@@ -22,12 +36,14 @@ export function Library() {
   const ready = useRepositoryReady();
   const router = useRouter();
   const { user } = useUser();
+  const { dark, toggle: toggleTheme } = useTheme();
 
   const [items, setItems] = useState<DiagramMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [folder, setFolder] = useState<string | null>(null);
   const [picking, setPicking] = useState(false);
+  const [deleting, setDeleting] = useState<DiagramMeta | null>(null);
   const { t } = useLocale();
 
   // `loading` starts true, so nothing needs setting before the read; a refresh
@@ -45,10 +61,12 @@ export function Library() {
     void refresh();
   }, [ready, refresh]);
 
+  /** Folders with how much is in each: a scope with no count is a guess. */
   const folders = useMemo(() => {
-    const names = new Set<string>();
-    for (const item of items) if (item.folder) names.add(item.folder);
-    return [...names].sort();
+    const counts = new Map<string, number>();
+    for (const item of items)
+      if (item.folder) counts.set(item.folder, (counts.get(item.folder) ?? 0) + 1);
+    return [...counts].sort(([a], [b]) => a.localeCompare(b));
   }, [items]);
 
   const visible = useMemo(() => {
@@ -75,44 +93,94 @@ export function Library() {
     <div className="library">
       <header className="library-header">
         <div className="library-identity">
-          <DigraphLogo size={26} animate />
+          <AcGraphLogo size={22} animate />
         </div>
-        <span className="topbar-divider" />
-        <span className="library-user">{user.name}</span>
         <span className="library-spacer" />
         <WorkspaceActions onChanged={refresh} t={t} />
+        <button
+          type="button"
+          className="icon-button"
+          title={t('action.toggleTheme')}
+          aria-label={t('action.toggleTheme')}
+          aria-pressed={dark}
+          onClick={toggleTheme}
+        >
+          {dark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
+        </button>
+        <span className="topbar-divider" />
+        <span className="library-user" title={user.name}>
+          <span className="library-avatar" aria-hidden="true">
+            {user.name.slice(0, 1).toUpperCase()}
+          </span>
+          {user.name}
+        </span>
         <button type="button" className="button is-primary" onClick={() => setPicking(true)}>
+          <PlusIcon size={15} />
           {t('library.new')}
         </button>
       </header>
 
+      {/* The one place in the app with room to say what it is. */}
+      <section className="library-hero">
+        <div className="library-hero-inner">
+          <h1 className="library-hero-title">{t('library.recent')}</h1>
+          <p className="library-hero-subtitle">{t('library.subtitle')}</p>
+          {items.length > 0 && (
+            <p className="library-hero-count tabular">
+              {items.length === 1
+                ? t('library.countOne')
+                : t('library.countMany', { count: items.length })}
+            </p>
+          )}
+        </div>
+      </section>
+
       <div className="library-toolbar">
-        <div className="library-search">
+        <div className="library-search filter-field">
           <SearchIcon size={15} />
           <input
-            className="library-search-input"
+            className="library-search-input filter-input"
             placeholder={t('library.search')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-        </div>
-        {folders.length > 0 && (
-          <div className="library-folders">
+          {query && (
             <button
               type="button"
-              className={`library-folder${folder === null ? ' is-active' : ''}`}
+              className="library-search-clear"
+              aria-label={t('library.clearSearch')}
+              onClick={() => setQuery('')}
+            >
+              <CloseIcon size={13} />
+            </button>
+          )}
+        </div>
+        {query.trim() !== '' && (
+          <span className="result-count">
+            {t('browser.showing', { count: visible.length, total: items.length })}
+          </span>
+        )}
+
+        {folders.length > 0 && (
+          <div className="library-folders chip-row">
+            <button
+              type="button"
+              className={`library-folder chip${folder === null ? ' is-active' : ''}`}
               onClick={() => setFolder(null)}
             >
               {t('library.all')}
+              <span className="chip-count">{items.length}</span>
             </button>
-            {folders.map((name) => (
+            {folders.map(([name, count]) => (
               <button
                 key={name}
                 type="button"
-                className={`library-folder${folder === name ? ' is-active' : ''}`}
+                className={`library-folder chip${folder === name ? ' is-active' : ''}`}
                 onClick={() => setFolder(name)}
               >
+                <FolderIcon size={13} />
                 {name}
+                <span className="chip-count">{count}</span>
               </button>
             ))}
           </div>
@@ -120,7 +188,21 @@ export function Library() {
       </div>
 
       <main className="library-body">
-        {loading && <p className="library-note">{t('library.loading')}</p>}
+        {/* Cards rather than a line of text: the page keeps its shape, so
+            nothing jumps when the real list arrives. */}
+        {loading && (
+          <ul className="library-grid" aria-busy="true" aria-label={t('library.loading')}>
+            {[0, 1, 2, 3].map((i) => (
+              <li key={i} className="library-card is-skeleton" aria-hidden="true">
+                <span className="library-thumb" />
+                <span className="library-card-body">
+                  <span className="skeleton-line" />
+                  <span className="skeleton-line is-short" />
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
         {!loading && items.length === 0 && (
           <section className="library-start">
@@ -129,10 +211,12 @@ export function Library() {
             <div className="library-templates">
               <button
                 type="button"
-                className="template-card"
+                className="template-card is-blank"
                 onClick={() => void create(t('app.untitled'))}
               >
-                <span className="template-icon">＋</span>
+                <span className="template-icon">
+                  <PlusIcon size={20} />
+                </span>
                 <span>
                   <b>{t('library.blank')}</b>
                   <small>{t('library.blankHint')}</small>
@@ -145,7 +229,9 @@ export function Library() {
                   className="template-card"
                   onClick={() => void create(template.name, template.build())}
                 >
-                  <span className="template-icon">{template.icon}</span>
+                  <span className="template-icon">
+                    <Glyph name={template.icon} size={20} />
+                  </span>
                   <span>
                     <b>{template.name}</b>
                     <small>{template.description}</small>
@@ -157,13 +243,21 @@ export function Library() {
         )}
 
         {!loading && items.length > 0 && visible.length === 0 && (
-          <p className="library-note">{t('library.noMatches')}</p>
+          <div className="library-note">
+            <SearchIcon size={22} />
+            <p>{t('library.noMatches')}</p>
+            <small>{t('library.noMatchesHint')}</small>
+          </div>
         )}
 
         {visible.length > 0 && (
           <ul className="library-grid">
-            {visible.map((item) => (
-              <li key={item.id} className="library-card">
+            {visible.map((item, index) => (
+              <li
+                key={item.id}
+                className="library-card"
+                style={{ '--i': index } as React.CSSProperties}
+              >
                 <button
                   type="button"
                   className="library-card-open"
@@ -177,10 +271,17 @@ export function Library() {
                       <TemplateIcon size={22} />
                     )}
                   </span>
-                  <span className="library-card-title">{item.title}</span>
-                  <span className="library-card-meta">
-                    {new Date(item.updatedAt).toLocaleDateString()}
-                    {item.folder ? ` · ${item.folder}` : ''}
+                  <span className="library-card-body">
+                    <span className="library-card-title">{item.title}</span>
+                    <span className="library-card-meta">
+                      <span>{t('library.updated', { when: relativeDay(item.updatedAt, t) })}</span>
+                      {item.folder && (
+                        <span className="library-card-folder">
+                          <FolderIcon size={11} />
+                          {item.folder}
+                        </span>
+                      )}
+                    </span>
                   </span>
                 </button>
                 <div className="library-card-actions">
@@ -198,11 +299,7 @@ export function Library() {
                     className="icon-button is-danger"
                     title={t('action.delete')}
                     aria-label={`${t('action.delete')}: ${item.title}`}
-                    onClick={() => {
-                      if (!window.confirm(t('library.confirmDelete', { title: item.title })))
-                        return;
-                      void repository.delete(item.id).then(refresh);
-                    }}
+                    onClick={() => setDeleting(item)}
                   >
                     <TrashIcon size={14} />
                   </button>
@@ -212,6 +309,20 @@ export function Library() {
           </ul>
         )}
       </main>
+
+      {deleting && (
+        <ConfirmDialog
+          t={t}
+          message={t('library.confirmDelete', { title: deleting.title })}
+          confirmLabel={t('action.delete')}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => {
+            const id = deleting.id;
+            setDeleting(null);
+            void repository.delete(id).then(refresh);
+          }}
+        />
+      )}
 
       {picking && (
         <NewDiagramDialog

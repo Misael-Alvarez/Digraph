@@ -4,17 +4,18 @@ import { useEffect, useRef } from 'react';
 import { EditorState, type Extension } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
-import {
-  bracketMatching,
-  indentOnInput,
-  syntaxHighlighting,
-  defaultHighlightStyle,
-} from '@codemirror/language';
+import { bracketMatching, indentOnInput, syntaxHighlighting } from '@codemirror/language';
 import { yaml } from '@codemirror/lang-yaml';
 import { closeBrackets, closeBracketsKeymap, completionKeymap } from '@codemirror/autocomplete';
 import { lintKeymap, lintGutter } from '@codemirror/lint';
 import type { CloudPrefix, Diagnostic } from '@/lib/dsl';
-import { autocompletion, dslLinter, editorTheme, serviceCompletion } from './codemirrorSetup';
+import {
+  autocompletion,
+  dslHighlight,
+  dslLinter,
+  editorTheme,
+  serviceCompletion,
+} from './codemirrorSetup';
 
 interface CodeEditorProps {
   value: string;
@@ -58,7 +59,7 @@ export function CodeEditor({
       bracketMatching(),
       closeBrackets(),
       highlightActiveLine(),
-      syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+      syntaxHighlighting(dslHighlight, { fallback: true }),
       yaml(),
       autocompletion({ override: [serviceCompletion(() => latest.current.cloud)] }),
       dslLinter(() => latest.current.diagnostics),

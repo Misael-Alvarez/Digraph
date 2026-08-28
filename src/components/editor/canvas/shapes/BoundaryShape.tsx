@@ -1,4 +1,4 @@
-import { fontSize, fontWeight } from '@/lib/design/tokens';
+import { fontSize, fontWeight, isColor, readableTextOn } from '@/lib/design/tokens';
 import { paletteFor } from '@/lib/editor/providers';
 import { handlersFor, type ShapeRenderProps } from './shapeProps';
 
@@ -6,10 +6,14 @@ const HEADER_H = 34;
 const RADIUS = 12;
 
 /** A cloud boundary or a sub-boundary zone, drawn as a titled panel. */
-export function BoundaryShape({ shape, interaction }: ShapeRenderProps) {
+export function BoundaryShape({ shape, theme, interaction }: ShapeRenderProps) {
   const palette = paletteFor(shape.icon?.key);
   const isSub = shape.variant === 'sub';
-  const headerFill = isSub ? palette.subHeader : palette.header;
+  // A zone's colours come from the provider it carries, unless the reader has
+  // chosen one: then that colour is the accent, and the body is the same hue
+  // held far enough back that the shapes inside stay readable on it.
+  const accent = isColor(shape.fill) ? shape.fill : null;
+  const headerFill = accent ?? (isSub ? palette.subHeader : palette.header);
   const clipId = `clip-header-${shape.id}`;
 
   return (
@@ -20,9 +24,9 @@ export function BoundaryShape({ shape, interaction }: ShapeRenderProps) {
         width={shape.w}
         height={shape.h}
         rx={RADIUS}
-        fill={palette.body}
-        fillOpacity={0.55}
-        stroke={palette.border}
+        fill={accent ?? palette.body}
+        fillOpacity={accent ? 0.1 : 0.55}
+        stroke={accent ?? palette.border}
         strokeWidth={1.25}
         {...handlersFor(shape.id, interaction)}
       />
@@ -47,7 +51,7 @@ export function BoundaryShape({ shape, interaction }: ShapeRenderProps) {
           y={shape.y + HEADER_H / 2 + 4}
           fontSize={fontSize.sm}
           fontWeight={fontWeight.semibold}
-          fill={palette.headerText}
+          fill={accent ? readableTextOn(accent, theme) : palette.headerText}
         >
           {shape.title}
         </text>

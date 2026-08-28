@@ -1,8 +1,9 @@
+import { isColor } from '@/lib/design/tokens';
 import { handlersFor, type ShapeRenderProps } from './shapeProps';
 
 /** The dashed well inside a group that the item stack sits in. */
 export function ContainerShape({ shape, theme, interaction }: ShapeRenderProps) {
-  const stroke = shape.fill ?? theme.containerStroke;
+  const stroke = isColor(shape.fill) ? shape.fill : theme.containerStroke;
   return (
     <rect
       x={shape.x}

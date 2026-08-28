@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { SERVICE_ICONS, CATEGORY_LABELS } from '@/data/serviceIcons';
-import { ALL_SYMBOLS } from '@/components/icons/svgIconDefs';
+import { ServiceSprite } from '@/components/icons/ServiceSprite';
+import { useLiquidPointer } from '@/components/app/useLiquidPointer';
 import { scoreMatch } from '@/lib/editor/search';
 import { useEditor } from '../EditorProvider';
 import { useCommands, type Command } from '../hooks/useCommands';
 import { SearchIcon } from '@/components/icons/ToolIcons';
+import { Glyph } from '@/components/icons/Glyph';
 
 type Row =
   | { kind: 'command'; command: Command }
@@ -77,10 +79,16 @@ function PaletteContents() {
   const active = Math.min(activeIndex, Math.max(rows.length - 1, 0));
 
   useEffect(() => {
-    listRef.current
-      ?.querySelector<HTMLElement>(`[data-index="${active}"]`)
-      ?.scrollIntoView({ block: 'nearest' });
-  }, [active]);
+    const list = listRef.current;
+    const row = list?.querySelector<HTMLElement>(`[data-index="${active}"]`);
+    if (!list || !row) return;
+    row.scrollIntoView({ block: 'nearest' });
+    // The highlight is one element that travels between rows. Arrowing through
+    // a list of things that blink on and off is a slideshow; arrowing through
+    // one that slides is a place you are moving inside.
+    list.style.setProperty('--row-y', `${row.offsetTop}px`);
+    list.style.setProperty('--row-h', `${row.offsetHeight}px`);
+  }, [active, rows.length]);
 
   const close = () => dispatchUi({ type: 'setPaletteOpen', open: false });
 
@@ -111,6 +119,8 @@ function PaletteContents() {
   };
 
   const firstServiceIndex = rows.findIndex((r) => r.kind === 'service');
+  const commandCount = firstServiceIndex === -1 ? rows.length : firstServiceIndex;
+  const liquid = useLiquidPointer();
 
   return (
     <div className="palette-backdrop" onPointerDown={close}>
@@ -120,6 +130,7 @@ function PaletteContents() {
         aria-modal="true"
         aria-label={t('palette.placeholder')}
         onPointerDown={(e) => e.stopPropagation()}
+        onPointerMove={liquid}
       >
         <div className="palette-search">
           <SearchIcon size={16} />
@@ -137,15 +148,27 @@ function PaletteContents() {
           />
         </div>
 
-        <div className="palette-list" id="palette-list" role="listbox" ref={listRef}>
+        <div
+          className="palette-list"
+          id="palette-list"
+          role="listbox"
+          ref={listRef}
+          data-has-rows={rows.length > 0}
+        >
           {rows.length === 0 && <p className="palette-empty">{t('palette.empty')}</p>}
           {rows.map((row, index) => (
             <div key={row.kind === 'command' ? row.command.id : row.key}>
               {index === 0 && row.kind === 'command' && (
-                <p className="palette-group">{t('palette.commands')}</p>
+                <p className="palette-group group-header">
+                  {t('palette.commands')}
+                  <span className="group-count">{commandCount}</span>
+                </p>
               )}
               {index === firstServiceIndex && (
-                <p className="palette-group">{t('palette.services')}</p>
+                <p className="palette-group group-header">
+                  {t('palette.services')}
+                  <span className="group-count">{rows.length - commandCount}</span>
+                </p>
               )}
               <button
                 type="button"
@@ -154,6 +177,7 @@ function PaletteContents() {
                 role="option"
                 aria-selected={index === active}
                 className={`palette-row${index === active ? ' is-active' : ''}`}
+                style={{ '--i': index } as React.CSSProperties}
                 // pointermove, not pointerenter: a stationary cursor that the
                 // list happens to open under would otherwise steal the selection,
                 // so a blind Enter could fire whatever sat beneath it.
@@ -174,7 +198,7 @@ function PaletteContents() {
                 ) : (
                   <>
                     <span className="palette-icon" aria-hidden="true">
-                      {row.command.icon}
+                      <Glyph name={row.command.icon} size={17} />
                     </span>
                     <span className="palette-label">{row.command.label}</span>
                     {row.command.shortcut && (
@@ -186,12 +210,26 @@ function PaletteContents() {
             </div>
           ))}
         </div>
+
+        {/* The list has always answered to these keys; nothing said so. */}
+        <footer className="palette-footer">
+          <span>
+            <kbd>↑</kbd>
+            <kbd>↓</kbd>
+            {t('palette.hintMove')}
+          </span>
+          <span>
+            <kbd>↵</kbd>
+            {t('palette.hintRun')}
+          </span>
+          <span>
+            <kbd>esc</kbd>
+            {t('palette.hintClose')}
+          </span>
+          <span className="palette-footer-count">{t('palette.count', { count: rows.length })}</span>
+        </footer>
       </div>
-      {/* The palette renders above the canvas in a portal-like overlay, so it
-          needs its own copy of the sprite for <use href="#i-..."> to resolve. */}
-      <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
-        <defs dangerouslySetInnerHTML={{ __html: ALL_SYMBOLS }} />
-      </svg>
+      <ServiceSprite />
     </div>
   );
 }

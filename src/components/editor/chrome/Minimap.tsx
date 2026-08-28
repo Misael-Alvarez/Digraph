@@ -1,9 +1,10 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { contentBBox } from '@/lib/engine';
 import { canvasTheme, providerColors } from '@/lib/design/tokens';
-import { visibleBox } from '@/lib/editor/viewport';
+import { providerOf } from '@/lib/editor/providers';
+import { centerOn, visibleBox } from '@/lib/editor/viewport';
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
 
@@ -12,7 +13,8 @@ const HEIGHT = 128;
 
 export function Minimap({ size }: { size: { width: number; height: number } }) {
   const { doc, ui, dispatchUi, t } = useEditor();
-  const theme = canvasTheme(ui.dark);
+  const theme = canvasTheme();
+  const svgRef = useRef<SVGSVGElement>(null);
 
   const box = useMemo(() => contentBBox(doc.model), [doc.model]);
   const viewBox = useMemo(() => {
@@ -25,20 +27,63 @@ export function Minimap({ size }: { size: { width: number; height: number } }) {
   const view = size.width ? visibleBox(ui.viewport, size) : null;
   const strokeScale = viewBox.w / WIDTH;
 
+  /**
+   * Where a pointer is, in canvas coordinates.
+   *
+   * The map's aspect ratio is not the diagram's, so the SVG letterboxes the
+   * content ("meet"): the drawing is centred inside the box and the margins are
+   * not part of it. Dividing by the element's size instead of by the scale that
+   * actually applied is what makes a minimap jump to the wrong place near its
+   * edges.
+   */
+  const pointToCanvas = (event: React.PointerEvent<SVGSVGElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const scale = Math.min(rect.width / viewBox.w, rect.height / viewBox.h);
+    return {
+      x: viewBox.x + (event.clientX - rect.left - (rect.width - viewBox.w * scale) / 2) / scale,
+      y: viewBox.y + (event.clientY - rect.top - (rect.height - viewBox.h * scale) / 2) / scale,
+    };
+  };
+
+  const goTo = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!size.width) return;
+    dispatchUi({
+      type: 'setViewport',
+      viewport: centerOn(ui.viewport, pointToCanvas(event), size),
+    });
+  };
+
   return (
     <div className="minimap" aria-label={t('action.toggleMinimap')}>
-      <button
-        type="button"
-        className="minimap-close"
-        aria-label={t('modal.close')}
-        onClick={() => dispatchUi({ type: 'toggleMinimap' })}
-      >
-        <CloseIcon size={11} />
-      </button>
+      <div className="minimap-header">
+        <span>{t('action.toggleMinimap')}</span>
+        <button
+          type="button"
+          className="minimap-close"
+          aria-label={t('modal.close')}
+          onClick={() => dispatchUi({ type: 'toggleMinimap' })}
+        >
+          <CloseIcon size={12} />
+        </button>
+      </div>
+      {/* A map you can only look at is half a map: clicking or dragging moves
+          the canvas, which is the whole reason to know where you are. */}
       <svg
+        ref={svgRef}
+        className="minimap-surface"
         width={WIDTH}
         height={HEIGHT}
         viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+        onPointerDown={(e) => {
+          e.currentTarget.setPointerCapture(e.pointerId);
+          goTo(e);
+        }}
+        onPointerMove={(e) => {
+          // The primary button is still down: `buttons`, not a piece of state,
+          // because pointer capture already guarantees the moves arrive here.
+          if (e.buttons & 1) goTo(e);
+        }}
+        onPointerUp={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
       >
         <rect x={viewBox.x} y={viewBox.y} width={viewBox.w} height={viewBox.h} fill={theme.sheet} />
         {doc.model.shapes
@@ -81,8 +126,14 @@ export function Minimap({ size }: { size: { width: number; height: number } }) {
               width={s.w}
               height={s.h}
               rx={3}
-              fill={providerColors.aion}
-              opacity={0.55}
+              // The provider's own colour, as the library thumbnails use: every
+              // service was drawn in the brand purple, so a map of an AWS
+              // diagram looked like a map of some other diagram entirely.
+              fill={
+                providerColors[providerOf(s.icon?.key) as keyof typeof providerColors] ??
+                providerColors.generic
+              }
+              opacity={0.7}
             />
           ))}
         {view && (

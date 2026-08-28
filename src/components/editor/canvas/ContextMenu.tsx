@@ -3,7 +3,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import * as E from '@/lib/engine';
 import type { MessageKey } from '@/lib/i18n/messages';
+import { shortcut } from '@/lib/editor/platform';
 import { useEditor } from '../EditorProvider';
+import { useLiquidPointer } from '@/components/app/useLiquidPointer';
 
 interface Entry {
   id: string;
@@ -24,7 +26,10 @@ function useClampedPosition(x: number, y: number) {
   useLayoutEffect(() => {
     const element = ref.current;
     if (!element) return;
-    const { width, height } = element.getBoundingClientRect();
+    // `offsetWidth`, not the painted rectangle: the menu animates in from a
+    // smaller scale, and measuring it mid-flight clamped it against a size it
+    // was about to outgrow — so a menu opened near the edge settled outside it.
+    const { offsetWidth: width, offsetHeight: height } = element;
     const margin = 8;
     setPosition({
       left: Math.min(x, window.innerWidth - width - margin),
@@ -45,6 +50,7 @@ function useClampedPosition(x: number, y: number) {
  */
 export function ContextMenu() {
   const { doc, ui, dispatch, dispatchUi, t } = useEditor();
+  const liquid = useLiquidPointer();
   const target = ui.contextMenu;
   const { ref, position } = useClampedPosition(target?.x ?? 0, target?.y ?? 0);
 
@@ -137,7 +143,7 @@ export function ContextMenu() {
       {
         id: 'duplicate',
         labelKey: 'action.duplicate',
-        shortcut: '⌘D',
+        shortcut: shortcut('D'),
         run: () => dispatch({ type: 'duplicateShapes', ids: selection }),
       },
       {
@@ -184,13 +190,13 @@ export function ContextMenu() {
       {
         id: 'browse',
         labelKey: 'action.browser',
-        shortcut: '⌘B',
+        shortcut: shortcut('B'),
         run: () => dispatchUi({ type: 'toggleBrowser' }),
       },
       {
         id: 'selectAll',
         labelKey: 'menu.selectAllHere',
-        shortcut: '⌘A',
+        shortcut: shortcut('A'),
         run: () =>
           dispatchUi({
             type: 'select',
@@ -212,6 +218,7 @@ export function ContextMenu() {
       role="menu"
       style={{ left: position.left, top: position.top }}
       onPointerDown={(e) => e.stopPropagation()}
+      onPointerMove={liquid}
     >
       {rows.map((row, index) =>
         row === SEPARATOR ? (
@@ -222,6 +229,7 @@ export function ContextMenu() {
             type="button"
             role="menuitem"
             className={`context-menu-item${row.danger ? ' is-danger' : ''}`}
+            style={{ '--i': index } as React.CSSProperties}
             onClick={() => {
               row.run();
               close();

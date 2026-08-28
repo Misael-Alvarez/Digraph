@@ -25,7 +25,8 @@ export function Canvas() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [spaceHeld, setSpaceHeld] = useState(false);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const theme = canvasTheme(ui.dark);
+  // Paper, not chrome: the sheet does not follow the interface's theme.
+  const theme = canvasTheme();
 
   const toLocal = useCallback((e: { clientX: number; clientY: number }) => {
     const rect = svgRef.current?.getBoundingClientRect();
@@ -76,6 +77,15 @@ export function Canvas() {
     };
   }, []);
 
+  /* The viewport as the wheel handler below sees it. It changes on every frame
+     of a pan, and a non-passive listener that is torn down and re-attached that
+     often is pure overhead — and a window in which a wheel event has nowhere to
+     land. */
+  const viewportRef = useRef(ui.viewport);
+  useEffect(() => {
+    viewportRef.current = ui.viewport;
+  });
+
   /* Wheel: pinch or ctrl zooms at the cursor, plain wheel pans.
      Bound to the host rather than the SVG so that overlays sitting above the
      canvas — the empty state's buttons, for one — cannot swallow the gesture. */
@@ -85,22 +95,23 @@ export function Canvas() {
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
       const local = toLocal(e);
+      const viewport = viewportRef.current;
       if (e.ctrlKey || e.metaKey) {
         const factor = Math.exp(-e.deltaY / 240);
         dispatchUi({
           type: 'setViewport',
-          viewport: zoomAt(ui.viewport, ui.viewport.zoom * factor, local),
+          viewport: zoomAt(viewport, viewport.zoom * factor, local),
         });
       } else {
         dispatchUi({
           type: 'setViewport',
-          viewport: { ...ui.viewport, x: ui.viewport.x - e.deltaX, y: ui.viewport.y - e.deltaY },
+          viewport: { ...viewport, x: viewport.x - e.deltaX, y: viewport.y - e.deltaY },
         });
       }
     };
     el.addEventListener('wheel', onWheel, { passive: false });
     return () => el.removeEventListener('wheel', onWheel);
-  }, [ui.viewport, dispatchUi, toLocal]);
+  }, [dispatchUi, toLocal]);
 
   const model = tools.previewModel;
 
@@ -265,6 +276,9 @@ export function Canvas() {
   const cursor =
     spaceHeld || ui.tool === 'pan' ? 'grab' : ui.tool === 'select' ? 'default' : 'crosshair';
 
+  /** The handle is drawn inside the zoomed group, so its size has to undo it. */
+  const handleSize = HANDLE / ui.viewport.zoom;
+
   return (
     <div
       ref={hostRef}
@@ -378,6 +392,30 @@ export function Canvas() {
                 />
               ))}
 
+            {/* What a comparison found, drawn on the diagram it is about: a list
+                of changes beside a canvas that does not show them makes the
+                reader do the matching by hand. */}
+            {ui.diffHighlight &&
+              model.shapes
+                .filter(
+                  (s) =>
+                    ui.diffHighlight!.added.includes(s.id) ||
+                    ui.diffHighlight!.changed.includes(s.id),
+                )
+                .map((s) => (
+                  <rect
+                    key={`d-${s.id}`}
+                    x={s.x - 3}
+                    y={s.y - 3}
+                    width={s.w + 6}
+                    height={s.h + 6}
+                    rx={10}
+                    className={
+                      ui.diffHighlight!.added.includes(s.id) ? 'diff-added' : 'diff-changed'
+                    }
+                  />
+                ))}
+
             {selectedShapes.map((s) => (
               <rect
                 key={`s-${s.id}`}
@@ -417,14 +455,17 @@ export function Canvas() {
             )}
           </g>
 
-          {/* Resize handle, only for a single selection of a sizeable shape. */}
+          {/* Resize handle, only for a single selection of a sizeable shape.
+              Sized against the zoom: as a plain canvas rectangle it shrank to
+              three unclickable pixels when the diagram was zoomed out, and grew
+              into a slab when it was zoomed in. */}
           {selectedShapes.length === 1 && selectedShapes[0].type !== 'container' && (
             <rect
-              x={selectedShapes[0].x + selectedShapes[0].w - HANDLE / 2}
-              y={selectedShapes[0].y + selectedShapes[0].h - HANDLE / 2}
-              width={HANDLE}
-              height={HANDLE}
-              rx={2}
+              x={selectedShapes[0].x + selectedShapes[0].w - handleSize / 2}
+              y={selectedShapes[0].y + selectedShapes[0].h - handleSize / 2}
+              width={handleSize}
+              height={handleSize}
+              rx={2 / ui.viewport.zoom}
               className="resize-handle"
               onPointerDown={(e) => {
                 e.stopPropagation();

@@ -5,17 +5,20 @@ import { PayloadTooLargeError } from '@/lib/share/codec';
 import { buildShareLinks, type ShareLinks } from '@/lib/share/links';
 import { useEditor } from '../EditorProvider';
 import { CloseIcon } from '@/components/icons/ToolIcons';
+import { useLiquidPointer } from '@/components/app/useLiquidPointer';
 
 function CopyField({
   label,
   hint,
   value,
+  copyLabel,
   copiedLabel,
   multiline,
 }: {
   label: string;
   hint?: string;
   value: string;
+  copyLabel: string;
   copiedLabel: string;
   multiline?: boolean;
 }) {
@@ -35,7 +38,7 @@ function CopyField({
             });
           }}
         >
-          {copied ? `✓ ${copiedLabel}` : 'Copiar'}
+          {copied ? `✓ ${copiedLabel}` : copyLabel}
         </button>
       </header>
       {hint && <p className="ai-note">{hint}</p>}
@@ -61,6 +64,7 @@ function CopyField({
  * handing out a link that will be truncated somewhere downstream.
  */
 export function ShareDialog() {
+  const liquid = useLiquidPointer();
   const { doc, ui, dispatchUi, t } = useEditor();
   const [links, setLinks] = useState<ShareLinks | null>(null);
   const [tooLarge, setTooLarge] = useState(false);
@@ -97,6 +101,7 @@ export function ShareDialog() {
     <div className="dialog-backdrop" onPointerDown={close}>
       <div
         className="dialog is-wide"
+        onPointerMove={liquid}
         role="dialog"
         aria-modal="true"
         aria-label={t('share.dialogTitle')}
@@ -123,12 +128,14 @@ export function ShareDialog() {
               <CopyField
                 label={t('share.link')}
                 value={links.view}
+                copyLabel={t('action.copy')}
                 copiedLabel={t('share.copied')}
               />
               <CopyField
                 label={t('share.readme')}
                 hint={t('share.readmeHint')}
                 value={links.readme}
+                copyLabel={t('action.copy')}
                 copiedLabel={t('share.copied')}
                 multiline
               />
@@ -136,6 +143,7 @@ export function ShareDialog() {
                 label={t('share.image')}
                 hint={t('share.imageHint')}
                 value={links.markdownImage}
+                copyLabel={t('action.copy')}
                 copiedLabel={t('share.copied')}
               />
               <div className="dialog-actions">

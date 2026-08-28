@@ -1,12 +1,12 @@
 import { G } from '@/lib/engine';
-import { fontSize, fontWeight, readableTextOn } from '@/lib/design/tokens';
+import { fontSize, fontWeight, isColor, readableTextOn } from '@/lib/design/tokens';
 import { handlersFor, type ShapeRenderProps } from './shapeProps';
 
 /** A service group: a titled card that holds a stack of items. */
 export function GroupShape({ shape, theme, interaction }: ShapeRenderProps) {
   const titleY = shape.y + G.GROUP_TITLE_DY - 8;
   const dividerY = shape.y + G.GROUP_TITLE_DY + 2;
-  const background = shape.fill ?? theme.groupFill;
+  const background = isColor(shape.fill) ? shape.fill : theme.groupFill;
   // A template or the colour picker can set any fill, so the title colour has to
   // be derived from it rather than taken from the theme.
   const titleColor = readableTextOn(background, theme);
