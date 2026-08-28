@@ -126,13 +126,26 @@ test('Delete removes the selection, but not while typing in a field', async ({ p
   await expect(page.locator('.empty-state')).toBeVisible();
 });
 
-test('toggles dark mode and keeps it across a reload', async ({ page }) => {
-  await page.getByRole('button', { name: /modo oscuro|toggle dark/i }).click();
+test('opens dark, and the light choice survives a reload', async ({ page }) => {
+  // The chrome is dark by default: it is meant to sit back behind the drawing.
   await expect(page.locator('html')).toHaveClass(/dark/);
+
+  await page.getByRole('button', { name: /modo oscuro|toggle dark/i }).click();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
 
   await page.reload();
   await page.waitForSelector('.canvas-surface');
-  await expect(page.locator('html')).toHaveClass(/dark/);
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+});
+
+test('the canvas stays paper whatever the chrome does', async ({ page }) => {
+  // The diagram is the lit thing in the product; dimming it with the interface
+  // leaves the reader looking at a grey rectangle.
+  const sheet = () => page.locator('.canvas-surface > rect').first().getAttribute('fill');
+  const inDark = await sheet();
+  await page.getByRole('button', { name: /modo oscuro|toggle dark/i }).click();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  expect(await sheet()).toBe(inDark);
 });
 
 test('reports no console or page errors', async ({ page }) => {

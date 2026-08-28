@@ -70,12 +70,33 @@ test('duplicates and deletes from the card', async ({ page }) => {
   await page.getByRole('button', { name: /Duplicar:/ }).click();
   await expect(page.locator('.library-card')).toHaveCount(2);
 
-  page.once('dialog', (dialog) => void dialog.accept());
   await page.locator('.library-card').first().hover();
   await page
     .getByRole('button', { name: /Eliminar:/ })
     .first()
     .click();
+
+  // The confirmation is the app's own dialog now, not the browser's.
+  const confirmation = page.getByRole('alertdialog');
+  await expect(confirmation).toBeVisible();
+  await expect(page.locator('.library-card')).toHaveCount(2);
+  await confirmation.getByRole('button', { name: 'Eliminar', exact: true }).click();
+  await expect(page.locator('.library-card')).toHaveCount(1);
+});
+
+test('cancelling the confirmation keeps the diagram', async ({ page }) => {
+  await page.getByRole('button', { name: 'Nuevo diagrama' }).click();
+  await page.locator('.dialog .template-card').filter({ hasText: 'Lienzo en blanco' }).click();
+  await page.waitForSelector('.canvas-surface');
+  await page.getByRole('button', { name: 'Todos los diagramas' }).click();
+
+  await page.locator('.library-card').first().hover();
+  await page
+    .getByRole('button', { name: /Eliminar:/ })
+    .first()
+    .click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);
   await expect(page.locator('.library-card')).toHaveCount(1);
 });
 

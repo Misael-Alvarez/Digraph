@@ -112,7 +112,8 @@ test('offers a read-only Mermaid view', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Mermaid' }).click();
   await expect.poll(() => codeText(page)).toContain('flowchart TD');
-  await expect(page.locator('.code-badge.is-muted')).toContainText('read-only');
+  // The badge is translated like everything else; the app runs in Spanish.
+  await expect(page.locator('.code-badge.is-muted')).toContainText('solo lectura');
   await expect.poll(() => codeText(page)).toContain('aion:services');
 });
 
