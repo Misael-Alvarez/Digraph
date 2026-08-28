@@ -115,6 +115,16 @@ export function serializeDsl(model: DiagramModel, options: SerializeOptions = {}
     if (record.item.note) spec.note = record.item.note;
     if (inBoundary) spec.in = inBoundary;
 
+    // What the node is, written flat beside what it draws.
+    const meta = record.item.meta;
+    if (meta?.technology) spec.technology = meta.technology;
+    if (meta?.owner) spec.owner = meta.owner;
+    if (meta?.repository) spec.repository = meta.repository;
+    if (meta?.environment) spec.environment = meta.environment;
+    if (meta?.criticality) spec.criticality = meta.criticality;
+    if (meta?.lifecycle) spec.lifecycle = meta.lifecycle;
+    if (meta?.tags?.length) spec.tags = meta.tags;
+
     // Collapse to the `key: service` shorthand when nothing else is set.
     nodes[record.key] = Object.keys(spec).length === 1 ? service : spec;
   }
@@ -124,8 +134,19 @@ export function serializeDsl(model: DiagramModel, options: SerializeOptions = {}
       const from = keyByItemId.get(connector.sourceId);
       const to = keyByItemId.get(connector.targetId);
       if (!from || !to) return null;
-      if (connector.style === 'dashed') {
-        return { from, to, label: connector.label || undefined, style: 'dashed' as const };
+      // The short form says only what the arrow looks like. An edge that also
+      // says how the call is made has to spell itself out.
+      const meta = connector.meta;
+      const described = meta && Object.values(meta).some(Boolean);
+      if (connector.style === 'dashed' || described) {
+        const long: Record<string, unknown> = { from, to };
+        if (connector.label) long.label = connector.label;
+        if (connector.style === 'dashed') long.style = 'dashed';
+        if (meta?.protocol) long.protocol = meta.protocol;
+        if (meta?.kind) long.kind = meta.kind;
+        if (meta?.auth) long.auth = meta.auth;
+        if (meta?.dataClass) long.dataClass = meta.dataClass;
+        return long;
       }
       return { [`${from} -> ${to}`]: connector.label };
     })

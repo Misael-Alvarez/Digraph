@@ -1,21 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2563ff"/>
-      <stop offset="100%" stop-color="#a855f7"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="14" fill="#0b0d11"/>
-  <path fill="url(#g)" fill-opacity="0.9" d="M17 12h14a20 20 0 0 1 0 40H17l4-6.5V19z"/>
-  <g stroke="#fff" stroke-width="2.6" stroke-linecap="round" fill="none">
-    <path d="M23 26h9"/>
-    <path d="M24 31v5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1042 700" width="64" height="64">
+  <!-- The AC Graph mark, on the brand's own dark ground so it reads in a tab. -->
+  <rect width="1042" height="700" rx="150" fill="#0f1115"/>
+  <g transform="translate(104 105) scale(0.8)">
+    <path fill="#6918ce" d="M366 1 L603 457 L631 498 L660 528 L698 556 L739 576 L788 589 L835 591 L876 583 L914 566 L951 539 L984 504 L1041 597 L1041 601 L1028 617 L989 650 L952 671 L906 688 L851 698 L793 699 L736 692 L682 679 L638 660 L607 640 L573 611 L549 585 L521 547 L506 522 L365 241 L128 694 L1 694Z"/>
+    <path fill="#ff5f06" d="M781 8 L848 9 L904 20 L936 31 L966 45 L992 61 L1015 79 L1036 100 L1041 106 L1041 110 L996 210 L994 211 L982 197 L947 167 L899 138 L867 126 L845 121 L803 120 L742 131 L711 142 L690 153 L667 170 L645 193 L630 214 L614 247 L612 247 L554 144 L552 139 L555 134 L571 114 L598 87 L623 67 L654 47 L684 32 L720 19Z"/>
+    <path fill="#ff5f06" d="M426 362 L485 477 L485 481 L378 690 L250 691Z"/>
   </g>
-  <g fill="#fff">
-    <path d="M34.5 26l-3.6-2.4v4.8z"/>
-    <path d="M24 38.6l-2.4-3.6h4.8z"/>
-  </g>
-  <circle cx="17" cy="30" r="6.5" fill="#2563ff"/>
-  <circle cx="38" cy="30" r="5.5" fill="#a855f7"/>
-  <circle cx="24" cy="41" r="4.5" fill="#2563ff"/>
 </svg>

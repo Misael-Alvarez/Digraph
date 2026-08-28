@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_VIEWPORT,
+  centerOn,
   MAX_ZOOM,
   MIN_ZOOM,
   clampZoom,
@@ -155,5 +156,28 @@ describe('fitToBox with insets', () => {
   it('matches the plain call when no insets are given', () => {
     const box = { x: 10, y: 10, w: 500, h: 300 };
     expect(fitToBox(box, size, 48, {})).toEqual(fitToBox(box, size, 48));
+  });
+});
+
+describe('centerOn', () => {
+  it('puts the point in the middle of the screen', () => {
+    const vp = centerOn({ x: 0, y: 0, zoom: 1.5 }, { x: 320, y: 180 }, size);
+    const centre = toScreen(vp, { x: 320, y: 180 });
+    expect(centre.x).toBeCloseTo(size.width / 2);
+    expect(centre.y).toBeCloseTo(size.height / 2);
+  });
+
+  it('moves without zooming: jumping on the map changes where, not how close', () => {
+    const before = { x: 12, y: -40, zoom: 0.4 };
+    expect(centerOn(before, { x: 900, y: 900 }, size).zoom).toBe(before.zoom);
+  });
+
+  it('centres the visible box on the point at any zoom', () => {
+    for (const zoom of [0.25, 1, 3]) {
+      const vp = centerOn({ x: 0, y: 0, zoom }, { x: -150, y: 240 }, size);
+      const box = visibleBox(vp, size);
+      expect(box.x + box.w / 2).toBeCloseTo(-150);
+      expect(box.y + box.h / 2).toBeCloseTo(240);
+    }
   });
 });

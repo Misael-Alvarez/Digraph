@@ -162,4 +162,29 @@ describe('computeAlignGuides', () => {
     expect(r.snapX).toBeNull();
     expect(r.snapY).toBeNull();
   });
+
+  it('ignores a grandchild, which travels with the shape just as a child does', () => {
+    // A group's items hang off its container, so they are grandchildren. The
+    // item is centred in the group, so the group snapped to its own contents
+    // and could not be moved by less than the snap distance.
+    const m = modelWith([
+      { id: 'drag', type: 'group', x: 100, y: 100, w: 200, h: 100 },
+      { id: 'ct', type: 'container', parentId: 'drag', x: 110, y: 110, w: 180, h: 80 },
+      { id: 'item', parentId: 'ct', x: 150, y: 125, w: 100, h: 50 },
+    ]);
+    const r = computeAlignGuides(m, 'drag', 102, 102, 200, 100);
+    expect(r.snapX).toBeNull();
+    expect(r.snapY).toBeNull();
+    expect(r.guides).toHaveLength(0);
+  });
+
+  it('still snaps to a shape that is not travelling with it', () => {
+    const m = modelWith([
+      { id: 'drag', type: 'group', x: 100, y: 100, w: 200, h: 100 },
+      { id: 'ct', type: 'container', parentId: 'drag', x: 110, y: 110, w: 180, h: 80 },
+      { id: 'item', parentId: 'ct', x: 150, y: 125, w: 100, h: 50 },
+      { id: 'elsewhere', type: 'group', x: 600, y: 98, w: 200, h: 100 },
+    ]);
+    expect(computeAlignGuides(m, 'drag', 100, 100, 200, 100).snapY).toBe(98);
+  });
 });

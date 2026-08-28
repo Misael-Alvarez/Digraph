@@ -52,6 +52,34 @@ describe('parseDiagramModel', () => {
     expect(r.success).toBe(false);
   });
 
+  it('drops the fills the old engine baked into every shape', () => {
+    // Those colours were the light theme's, written into the model at creation,
+    // so a stored diagram opened in dark mode came back as white cards.
+    const model = parseDiagramModel({
+      canvas: { w: 100, h: 100 },
+      shapes: [
+        { id: 'g', type: 'group', parentId: null, x: 0, y: 0, w: 1, h: 1, fill: '#FAFBFC' },
+        { id: 'i', type: 'item', parentId: null, x: 0, y: 0, w: 1, h: 1, fill: '#F1F3F4' },
+      ],
+      connectors: [],
+    });
+    expect(model.shapes.map((s) => s.fill)).toEqual([undefined, undefined]);
+  });
+
+  it('keeps a fill somebody chose, including the same grey in lower case', () => {
+    const model = parseDiagramModel({
+      canvas: { w: 100, h: 100 },
+      shapes: [
+        { id: 'a', type: 'item', parentId: null, x: 0, y: 0, w: 1, h: 1, fill: '#f1f3f4' },
+        { id: 'b', type: 'group', parentId: null, x: 0, y: 0, w: 1, h: 1, fill: '#123456' },
+        // The old default for an item, on a shape that is not an item.
+        { id: 'c', type: 'group', parentId: null, x: 0, y: 0, w: 1, h: 1, fill: '#F1F3F4' },
+      ],
+      connectors: [],
+    });
+    expect(model.shapes.map((s) => s.fill)).toEqual(['#f1f3f4', '#123456', '#F1F3F4']);
+  });
+
   it('throws rather than returning junk', () => {
     expect(() => parseDiagramModel(null)).toThrow();
     expect(() => parseDiagramModel('{}')).toThrow();

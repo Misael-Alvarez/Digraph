@@ -34,6 +34,9 @@ export interface UiState {
   codeOpen: boolean;
   /** Version history panel. */
   versionsOpen: boolean;
+  insightsOpen: boolean;
+  /** Nodes the open comparison says are new or altered, for the canvas. */
+  diffHighlight: { added: string[]; changed: string[] } | null;
   /** Service browser drawer. */
   browserOpen: boolean;
   inspectorPinned: boolean;
@@ -49,13 +52,16 @@ export const initialUiState: UiState = {
   connectorSourceId: null,
   viewport: DEFAULT_VIEWPORT,
   gridSnap: true,
-  dark: false,
+  // Dark by default: the chrome is meant to sit back behind the drawing.
+  dark: true,
   brand: 'aion',
   locale: 'es',
   minimapOpen: true,
   paletteOpen: false,
   codeOpen: false,
   versionsOpen: false,
+  insightsOpen: false,
+  diffHighlight: null,
   browserOpen: false,
   inspectorPinned: false,
   modal: null,
@@ -78,6 +84,8 @@ export type UiAction =
   | { type: 'toggleMinimap' }
   | { type: 'toggleCode' }
   | { type: 'toggleVersions' }
+  | { type: 'toggleInsights' }
+  | { type: 'setDiffHighlight'; highlight: UiState['diffHighlight'] }
   | { type: 'toggleBrowser' }
   | { type: 'setPaletteOpen'; open: boolean }
   | { type: 'toggleInspectorPinned' }
@@ -135,10 +143,17 @@ export function uiReducer(state: UiState, action: UiAction): UiState {
 
     case 'toggleCode':
       // The two side panels share the same column, so only one can be open.
-      return { ...state, codeOpen: !state.codeOpen, versionsOpen: false };
+      return { ...state, codeOpen: !state.codeOpen, versionsOpen: false, insightsOpen: false };
 
     case 'toggleVersions':
-      return { ...state, versionsOpen: !state.versionsOpen, codeOpen: false };
+      return { ...state, versionsOpen: !state.versionsOpen, codeOpen: false, insightsOpen: false };
+
+    // The three share one column, so opening one closes the others.
+    case 'toggleInsights':
+      return { ...state, insightsOpen: !state.insightsOpen, codeOpen: false, versionsOpen: false };
+
+    case 'setDiffHighlight':
+      return { ...state, diffHighlight: action.highlight };
 
     case 'toggleBrowser':
       return { ...state, browserOpen: !state.browserOpen };

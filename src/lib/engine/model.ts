@@ -138,7 +138,6 @@ export function addBoundary(
     title: variant === 'outer' ? 'Cloud Environment' : 'Sub-boundary',
     note: '',
     icon: { kind: 'symbol', key: 'gcp-cloudrun' },
-    fill: '#F8F9FA',
   };
   model.shapes.push(s);
   return s;
@@ -155,7 +154,6 @@ export function addGroup(model: DiagramModel, x: number, y: number): Shape {
     h: 208,
     manualSize: false,
     title: 'New Group',
-    fill: '#FAFBFC',
   };
   model.shapes.push(group);
   const container: Shape = {
@@ -166,7 +164,6 @@ export function addGroup(model: DiagramModel, x: number, y: number): Shape {
     y: 0,
     w: 0,
     h: 0,
-    fill: '#9AA0A6',
     stacked_gap: 'tight',
   };
   model.shapes.push(container);
@@ -183,7 +180,6 @@ export function addGroup(model: DiagramModel, x: number, y: number): Shape {
     title: 'New Item',
     subtitle: 'Subtitle',
     note: '',
-    fill: '#F1F3F4',
   };
   model.shapes.push(item);
   relayoutGroup(model, group);
@@ -208,7 +204,6 @@ export function addItemToContainer(model: DiagramModel, containerId: string): Sh
     title: 'New Item',
     subtitle: 'Subtitle',
     note: '',
-    fill: '#F1F3F4',
   };
   model.shapes.push(item);
   const group = container.parentId ? getShape(model, container.parentId) : undefined;

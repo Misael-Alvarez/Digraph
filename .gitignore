@@ -50,3 +50,6 @@ generate-icons.js
 /playwright-report
 /blob-report
 /playwright/.cache
+
+# Python bytecode from the .claude skills
+__pycache__/

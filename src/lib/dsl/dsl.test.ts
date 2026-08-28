@@ -310,6 +310,133 @@ edges: []
   });
 });
 
+describe('a node is more than a box', () => {
+  const SOURCE = `version: 1
+cloud: aws
+nodes:
+  api:
+    service: apigateway
+    owner: payments-platform
+    technology: FastAPI
+    repository: github/payments-api
+    environment: prod
+    criticality: critical
+    lifecycle: active
+    tags:
+      - pci
+  db:
+    service: dynamodb
+    owner: payments-platform
+edges:
+  - from: api
+    to: db
+    label: R/W
+    protocol: https
+    kind: sync
+    auth: IAM
+    dataClass: pii
+`;
+
+  it('carries what a node is into the model', () => {
+    const { model } = parseDsl(SOURCE);
+    const api = itemsOf(model).find((s) => s.icon?.key === 'aws-apigateway')!;
+    expect(api.meta).toEqual({
+      technology: 'FastAPI',
+      owner: 'payments-platform',
+      repository: 'github/payments-api',
+      environment: 'prod',
+      criticality: 'critical',
+      lifecycle: 'active',
+      tags: ['pci'],
+    });
+  });
+
+  it('carries what an edge means into the model', () => {
+    const { model } = parseDsl(SOURCE);
+    expect(model!.connectors[0].meta).toEqual({
+      protocol: 'https',
+      kind: 'sync',
+      auth: 'IAM',
+      dataClass: 'pii',
+    });
+  });
+
+  it('writes it all back out, unchanged', () => {
+    const first = parseDsl(SOURCE);
+    const written = serializeDsl(first.model!, { includeLayout: false });
+    const again = parseDsl(written);
+
+    const metaOf = (model: typeof first.model) =>
+      itemsOf(model)
+        .map((s) => [s.icon?.key, s.meta] as const)
+        .sort(([a], [b]) => String(a).localeCompare(String(b)));
+    expect(metaOf(again.model)).toEqual(metaOf(first.model));
+    expect(again.model!.connectors[0].meta).toEqual(first.model!.connectors[0].meta);
+  });
+
+  it('leaves an undescribed edge in the short form', () => {
+    // The long form is the price of saying more; an arrow that says nothing
+    // extra should not pay it.
+    const { model } = parseDsl(`version: 1
+nodes:
+  a: lambda
+  b: dynamodb
+edges:
+  - a -> b: writes
+`);
+    // Node keys are regenerated from titles, so assert the notation, not the ids.
+    const written = serializeDsl(model!, { includeLayout: false });
+    expect(written).toContain(' -> ');
+    expect(written).not.toContain('from:');
+  });
+});
+
+describe('clouds beyond the first three', () => {
+  it('accepts a cloud the catalogue grew into', () => {
+    // `cloud: oci` used to fail the schema, so an Oracle diagram could be drawn
+    // on the canvas but not written down in code.
+    const { model, diagnostics } = parseDsl(`version: 1
+cloud: oci
+nodes:
+  api: functions
+  files: objectstorage
+edges:
+  - api -> files: read
+`);
+    expect(diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
+    const keys = (model?.shapes ?? []).flatMap((s) => (s.icon ? [s.icon.key] : []));
+    expect(keys).toContain('oci-functions');
+    expect(keys).toContain('oci-objectstorage');
+  });
+
+  it('resolves an unprefixed name inside an IBM document', () => {
+    expect(resolveService('codeengine', 'ibm')).toBe('ibm-codeengine');
+    expect(resolveService('vpc', 'ibm')).toBe('ibm-vpc');
+  });
+
+  it('writes the cloud back out, so the round trip is lossless', () => {
+    const source = `version: 1
+cloud: ibm
+nodes:
+  run: codeengine
+  net: vpc
+`;
+    const first = parseDsl(source);
+    const written = serializeDsl(first.model!);
+    expect(written).toContain('cloud: ibm');
+    const again = parseDsl(written);
+    const keys = (model: DiagramModel | null) =>
+      (model?.shapes ?? []).flatMap((s) => (s.icon ? [s.icon.key] : [])).sort();
+    expect(keys(again.model)).toEqual(keys(first.model));
+  });
+
+  it('shortens and detects the new clouds like any other', () => {
+    expect(shortenService('oci-functions', 'oci')).toBe('functions');
+    expect(dominantCloud(['ibm-vpc', 'ibm-codeengine'])).toBe('ibm');
+    expect(dominantCloud(['ibm-vpc', 'oci-functions'])).toBeUndefined();
+  });
+});
+
 describe('templates round-trip through the DSL', () => {
   for (const template of TEMPLATES) {
     it(`preserves "${template.name}"`, () => {

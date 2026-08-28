@@ -1,8 +1,24 @@
 import { SERVICE_ICONS } from '@/data/serviceIcons';
 
-export type CloudPrefix = 'aws' | 'azure' | 'gcp';
+/**
+ * The clouds a document can default to.
+ *
+ * The same five the equivalence table can retarget a diagram between. It was
+ * three for as long as the catalogue was three: an Oracle or IBM diagram could
+ * be drawn but not written down, because `cloud: oci` was not a value the
+ * schema accepted.
+ */
+export type CloudPrefix = 'aws' | 'azure' | 'gcp' | 'oci' | 'ibm';
 
-const PREFIX: Record<CloudPrefix, string> = { aws: 'aws-', azure: 'az-', gcp: 'gcp-' };
+export const CLOUD_PREFIXES: CloudPrefix[] = ['aws', 'azure', 'gcp', 'oci', 'ibm'];
+
+const PREFIX: Record<CloudPrefix, string> = {
+  aws: 'aws-',
+  azure: 'az-',
+  gcp: 'gcp-',
+  oci: 'oci-',
+  ibm: 'ibm-',
+};
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -53,10 +69,9 @@ export function shortenService(key: string, cloud?: CloudPrefix): string {
 export function dominantCloud(keys: string[]): CloudPrefix | undefined {
   const clouds = new Set<CloudPrefix>();
   for (const key of keys) {
-    if (key.startsWith('aws-')) clouds.add('aws');
-    else if (key.startsWith('az-')) clouds.add('azure');
-    else if (key.startsWith('gcp-')) clouds.add('gcp');
     // Cloud-neutral services do not vote.
+    const cloud = CLOUD_PREFIXES.find((candidate) => key.startsWith(PREFIX[candidate]));
+    if (cloud) clouds.add(cloud);
   }
   return clouds.size === 1 ? [...clouds][0] : undefined;
 }

@@ -20,7 +20,7 @@ export const LEGACY_LOCALSTORAGE_KEY = 'aion-arch-studio-autosave';
 export const LOCAL_OWNER_ID = 'local-user';
 
 /** How many snapshots to keep per diagram before the oldest are dropped. */
-const MAX_VERSIONS_PER_DIAGRAM = 50;
+export const MAX_VERSIONS_PER_DIAGRAM = 50;
 
 interface StudioDB extends DBSchema {
   diagrams: { key: string; value: DiagramRecord };
@@ -213,23 +213,37 @@ export class LocalDiagramRepository implements DiagramRepository {
     };
   }
 
-  /** Merges an export into the store, giving every record a new ID. Returns the diagram count. */
+  /**
+   * Merges an export into the store, giving every record a new ID.
+   *
+   * All or nothing, in two ways: every record is validated before any of them
+   * is written, and the writes share one transaction. A dump that failed
+   * halfway used to leave behind the diagrams it had already reached — the
+   * reader was told the file was invalid while part of it appeared anyway.
+   *
+   * Returns the diagram count.
+   */
   async importWorkspace(data: WorkspaceExport): Promise<number> {
+    const diagrams = data.diagrams.map((raw) => DiagramRecordSchema.parse(raw));
+    const versions = data.versions.map((raw) => DiagramVersionSchema.parse(raw));
+
     const db = await this.db();
     const idMap = new Map<string, string>();
+    for (const parsed of diagrams) idMap.set(parsed.id, uid('dgm'));
 
-    for (const raw of data.diagrams) {
-      const parsed = DiagramRecordSchema.parse(raw);
-      const newId = uid('dgm');
-      idMap.set(parsed.id, newId);
-      await db.put('diagrams', { ...parsed, id: newId });
+    const tx = db.transaction(['diagrams', 'versions'], 'readwrite');
+    for (const parsed of diagrams) {
+      void tx.objectStore('diagrams').put({ ...parsed, id: idMap.get(parsed.id)! });
     }
-    for (const raw of data.versions) {
-      const parsed = DiagramVersionSchema.parse(raw);
+    for (const parsed of versions) {
       const mappedDiagramId = idMap.get(parsed.diagramId);
       if (!mappedDiagramId) continue;
-      await db.put('versions', { ...parsed, id: uid('ver'), diagramId: mappedDiagramId });
+      void tx
+        .objectStore('versions')
+        .put({ ...parsed, id: uid('ver'), diagramId: mappedDiagramId });
     }
+    await tx.done;
+
     return idMap.size;
   }
 

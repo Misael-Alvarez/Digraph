@@ -6,6 +6,7 @@ import {
   darkCanvas,
   darkColors,
   fontSize,
+  isColor,
   lightCanvas,
   lightColors,
   luminance,
@@ -169,8 +170,30 @@ describe('stylesheet integrity', () => {
   /** Every custom property it reads. */
   const used = new Set([...css.matchAll(/var\((--[a-z0-9-]+)/g)].map((m) => m[1]));
 
-  /** Set by React inline styles, so the stylesheet never declares them. */
-  const RUNTIME_PROVIDED = new Set(['--chip-color', '--cloud-color']);
+  /**
+   * Declared outside this stylesheet: the colours and the row index by React
+   * inline styles, the pointer position by `useLiquidPointer`, the font pair by
+   * `next/font` on the <html> element (see app/layout.tsx).
+   *
+   * Every one of these is written with a fallback at the point of use, so a
+   * surface nobody has pointed at yet still has a defined background.
+   */
+  const RUNTIME_PROVIDED = new Set([
+    '--chip-color',
+    '--cloud-color',
+    '--font-sans',
+    '--font-mono',
+    // The pointer's position, written by `useLiquidPointer`.
+    '--gx',
+    '--gy',
+    // Positions measured from the DOM: the dock's active tool and the palette's
+    // travelling highlight.
+    '--tool-index',
+    '--row-y',
+    '--row-h',
+    // A row's index in its list, for the stagger.
+    '--i',
+  ]);
 
   it('defines every custom property it uses', () => {
     // An undefined property makes the whole declaration invalid, silently. That
@@ -211,5 +234,20 @@ describe('stylesheet integrity', () => {
     expect(readVar(':root', 'brand-to')).toBeTruthy();
     expect(readVar('.dark', 'brand-from')).toBeTruthy();
     expect(readVar('.dark', 'brand-to')).toBeTruthy();
+  });
+});
+
+describe('isColor', () => {
+  it('accepts the two hex forms a colour input produces', () => {
+    expect(isColor('#fff')).toBe(true);
+    expect(isColor('#F1F3F4')).toBe(true);
+  });
+
+  it('rejects what a text field lets a user type', () => {
+    // Each of these used to reach the canvas as a shape fill, and an exported
+    // SVG paints an unrecognised fill black.
+    for (const value of ['', 'rojo', '#12', '#1234567', 'rgb(0,0,0)', 'red', undefined]) {
+      expect(isColor(value), String(value)).toBe(false);
+    }
   });
 });

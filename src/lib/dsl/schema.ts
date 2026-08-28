@@ -1,4 +1,13 @@
 import { z } from 'zod';
+import type { EdgeMeta, NodeMeta } from '@/lib/domain';
+import {
+  CriticalitySchema,
+  DataClassSchema,
+  EdgeKindSchema,
+  EnvironmentSchema,
+  LifecycleSchema,
+  ProtocolSchema,
+} from '@/lib/domain';
 
 /**
  * The diagram-as-code document.
@@ -23,6 +32,16 @@ export const NodeSpecSchema = z.object({
   note: z.string().optional(),
   /** Id of the boundary this node sits inside. */
   in: z.string().optional(),
+
+  /* What the node is, flat rather than under a `meta:` key — the whole point of
+     a document you hand-write is that `owner: payments` is one line. */
+  technology: z.string().optional(),
+  owner: z.string().optional(),
+  repository: z.string().optional(),
+  environment: EnvironmentSchema.optional(),
+  criticality: CriticalitySchema.optional(),
+  lifecycle: LifecycleSchema.optional(),
+  tags: z.array(z.string()).optional(),
 });
 
 /** `fn: lambda` is shorthand for `fn: { service: lambda }`. */
@@ -44,12 +63,16 @@ export const EdgeLongSchema = z.object({
   to: z.string(),
   label: z.string().optional(),
   style: z.enum(['solid', 'dashed']).optional(),
+  protocol: ProtocolSchema.optional(),
+  kind: EdgeKindSchema.optional(),
+  auth: z.string().optional(),
+  dataClass: DataClassSchema.optional(),
 });
 
 export const DslDocumentSchema = z.object({
   version: z.number().default(DSL_VERSION),
   /** Default cloud used to resolve unprefixed service names. */
-  cloud: z.enum(['aws', 'azure', 'gcp']).optional(),
+  cloud: z.enum(['aws', 'azure', 'gcp', 'oci', 'ibm']).optional(),
   title: z.string().optional(),
   boundaries: z.record(z.string(), BoundarySpecSchema).optional(),
   nodes: z.record(z.string(), NodeEntrySchema),
@@ -68,10 +91,34 @@ export interface NormalisedEdge {
   to: string;
   label: string;
   style: 'solid' | 'dashed';
+  meta?: EdgeMeta;
+}
+
+/** The parts of a node spec that describe the service rather than draw it. */
+export function pickNodeMeta(spec: NodeSpec): NodeMeta | undefined {
+  const meta: NodeMeta = {};
+  if (spec.technology) meta.technology = spec.technology;
+  if (spec.owner) meta.owner = spec.owner;
+  if (spec.repository) meta.repository = spec.repository;
+  if (spec.environment) meta.environment = spec.environment;
+  if (spec.criticality) meta.criticality = spec.criticality;
+  if (spec.lifecycle) meta.lifecycle = spec.lifecycle;
+  if (spec.tags?.length) meta.tags = spec.tags;
+  return Object.keys(meta).length ? meta : undefined;
 }
 
 /** Matches `a -> b`, and tolerates `-->` and `→`. */
 const ARROW = /^(.+?)\s*(?:->|-->|→)\s*(.+)$/;
+
+/** The parts of a long-form edge that describe the call rather than the line. */
+function pickEdgeMeta(edge: z.infer<typeof EdgeLongSchema>): EdgeMeta | undefined {
+  const meta: EdgeMeta = {};
+  if (edge.protocol) meta.protocol = edge.protocol;
+  if (edge.kind) meta.kind = edge.kind;
+  if (edge.auth) meta.auth = edge.auth;
+  if (edge.dataClass) meta.dataClass = edge.dataClass;
+  return Object.keys(meta).length ? meta : undefined;
+}
 
 export function normaliseEdges(edges: DslDocument['edges']): NormalisedEdge[] {
   const out: NormalisedEdge[] = [];
@@ -83,6 +130,7 @@ export function normaliseEdges(edges: DslDocument['edges']): NormalisedEdge[] {
         to: long.to,
         label: long.label ?? '',
         style: long.style ?? 'solid',
+        meta: pickEdgeMeta(long),
       });
       continue;
     }

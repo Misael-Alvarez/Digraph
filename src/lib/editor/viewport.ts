@@ -107,6 +107,20 @@ export function visibleBox(vp: Viewport, size: Size): BBox {
   };
 }
 
+/**
+ * Moves the viewport so a canvas point sits in the middle of the screen.
+ *
+ * The zoom is left alone: jumping somewhere on the minimap should change where
+ * you are, not how close you are standing.
+ */
+export function centerOn(vp: Viewport, point: Point, size: Size): Viewport {
+  return {
+    ...vp,
+    x: size.width / 2 - point.x * vp.zoom,
+    y: size.height / 2 - point.y * vp.zoom,
+  };
+}
+
 /** SVG transform string for the canvas root group. */
 export function viewportTransform(vp: Viewport): string {
   return `translate(${vp.x} ${vp.y}) scale(${vp.zoom})`;

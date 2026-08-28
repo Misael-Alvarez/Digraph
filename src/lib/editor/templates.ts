@@ -15,6 +15,7 @@ interface TemplateSpec {
   id: string;
   name: string;
   description: string;
+  /** Name resolved by `<Glyph>` — see components/icons/Glyph.tsx. */
   icon: string;
   nodes: NodeSpec[];
   edges: [from: string, to: string, label: string][];
@@ -68,7 +69,7 @@ export const TEMPLATE_SPECS: TemplateSpec[] = [
     id: 'serverless',
     name: 'Serverless API',
     description: 'CloudFront → API Gateway → Lambda → DynamoDB/S3',
-    icon: '⚡',
+    icon: 'bolt',
     nodes: [
       { label: 'CloudFront', service: 'aws-cloudfront', x: 80, y: 100 },
       { label: 'API Gateway', service: 'aws-apigateway', x: 620, y: 100 },
@@ -87,7 +88,7 @@ export const TEMPLATE_SPECS: TemplateSpec[] = [
     id: 'microservices',
     name: 'Microservices',
     description: 'Load balancer → services → database, cache and queue',
-    icon: '🔧',
+    icon: 'mesh',
     nodes: [
       { label: 'Load Balancer', service: 'aws-elb', x: 80, y: 260 },
       { label: 'Auth Service', service: 'aws-cognito', x: 620, y: 40 },
@@ -110,7 +111,7 @@ export const TEMPLATE_SPECS: TemplateSpec[] = [
     id: 'data-pipeline',
     name: 'Data Pipeline',
     description: 'S3 → Glue → Redshift/Athena → QuickSight',
-    icon: '📊',
+    icon: 'chart',
     nodes: [
       { label: 'Source (S3)', service: 'aws-s3', x: 80, y: 200 },
       { label: 'Glue ETL', service: 'aws-glue', x: 620, y: 200 },
@@ -130,7 +131,7 @@ export const TEMPLATE_SPECS: TemplateSpec[] = [
     id: 'ml-pipeline',
     name: 'ML Pipeline',
     description: 'Data lake → SageMaker/Bedrock → API',
-    icon: '🧠',
+    icon: 'brain',
     nodes: [
       { label: 'Data Lake', service: 'aws-s3', x: 80, y: 200 },
       { label: 'SageMaker', service: 'aws-sagemaker', x: 620, y: 60 },
@@ -150,7 +151,7 @@ export const TEMPLATE_SPECS: TemplateSpec[] = [
     id: 'three-tier',
     name: '3-Tier App',
     description: 'CDN → web and app tiers → database, cache and storage',
-    icon: '🏗️',
+    icon: 'layers',
     nodes: [
       { label: 'CloudFront CDN', service: 'aws-cloudfront', x: 80, y: 260 },
       { label: 'Web Tier', service: 'aws-ec2', x: 620, y: 60 },

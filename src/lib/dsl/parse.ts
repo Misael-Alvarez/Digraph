@@ -7,6 +7,7 @@ import {
   DslDocumentSchema,
   normaliseEdges,
   normaliseNode,
+  pickNodeMeta,
   type DslDocument,
   type NormalisedEdge,
 } from './schema';
@@ -220,6 +221,9 @@ export function compile(document: DslDocument): { model: DiagramModel; diagnosti
     item.subtitle = spec.subtitle ?? service?.description ?? '';
     item.note = spec.note ?? '';
     item.icon = { kind: 'symbol', key: serviceKey };
+    // What the node *is*, as opposed to where it sits, rides on the item —
+    // which is the shape the DSL calls a node.
+    item.meta = pickNodeMeta(spec);
     itemIdByNode.set(nodeId, item.id);
   }
 
@@ -230,6 +234,7 @@ export function compile(document: DslDocument): { model: DiagramModel; diagnosti
     const connector = E.addConnector(model, sourceId, targetId);
     connector.label = edge.label;
     connector.style = edge.style;
+    connector.meta = edge.meta;
   }
 
   /** The group that represents a node, resolved through its item. */

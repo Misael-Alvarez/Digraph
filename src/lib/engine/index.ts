@@ -9,3 +9,5 @@ export * from './clipboard';
 export * from './cloud';
 export * from './markdown';
 export * from './align';
+export * from './analysis';
+export * from './diff';

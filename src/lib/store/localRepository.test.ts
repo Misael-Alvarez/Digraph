@@ -213,6 +213,21 @@ describe('workspace export / import', () => {
     expect((await repo.list()).map((d) => d.title).sort()).toEqual(['Existing', 'Incoming']);
   });
 
+  it('writes nothing at all when one record in the dump is invalid', async () => {
+    // The reader was told the file was invalid while the diagrams the import
+    // had already reached appeared in the library anyway.
+    const good = await freshRepo().create({ title: 'Good', model: createEmptyModel() });
+    await expect(
+      repo.importWorkspace({
+        exportedAt: new Date().toISOString(),
+        // @ts-expect-error the second record is deliberately malformed
+        diagrams: [good, { id: 'x', title: 'broken' }],
+        versions: [],
+      }),
+    ).rejects.toThrow();
+    expect(await repo.list()).toEqual([]);
+  });
+
   it('rejects a dump containing an invalid diagram', async () => {
     await expect(
       repo.importWorkspace({

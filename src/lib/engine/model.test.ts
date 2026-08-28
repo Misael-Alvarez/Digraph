@@ -220,6 +220,17 @@ describe('addBoundary', () => {
   });
 });
 
+describe('shape creation', () => {
+  it('leaves the colour to the theme instead of writing one into the model', () => {
+    // Every factory used to stamp a light-theme colour onto the shape, which is
+    // why a group drawn in dark mode was a white card.
+    const m = createEmptyModel();
+    addGroup(m, 0, 0);
+    addBoundary(m, 0, 0, 'outer');
+    expect(m.shapes.map((s) => s.fill)).toEqual(m.shapes.map(() => undefined));
+  });
+});
+
 describe('addItemToContainer', () => {
   it('refuses a non-container target', () => {
     const m = createEmptyModel();

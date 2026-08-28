@@ -131,8 +131,18 @@ export function computeAlignGuides(
   const dragR = dragX + dragW;
   const dragB = dragY + dragH;
 
+  /**
+   * What travels with the shape cannot be something to align it against.
+   *
+   * Skipping only the direct children was not enough: a group's items hang off
+   * its container, so a dragged group found its own item centred inside it,
+   * snapped to it, and could not be moved by less than the snap distance at
+   * all — while drawing a guide against a shape that was moving with it.
+   */
+  const moving = collectDescendantIds(model, dragId);
+
   for (const s of model.shapes) {
-    if (s.id === dragId || s.parentId === dragId) continue;
+    if (moving.has(s.id)) continue;
     if (s.type === 'container') continue;
 
     const sCX = s.x + s.w / 2;

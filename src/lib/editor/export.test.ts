@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { addConnector, addGroup, children, createEmptyModel } from '@/lib/engine';
+import { addBoundary, addConnector, addGroup, children, createEmptyModel } from '@/lib/engine';
+import { lightCanvas, readableTextOn } from '@/lib/design/tokens';
 import { diagramToSvgString } from './renderSvg';
 
 function sampleModel() {
@@ -124,6 +125,46 @@ describe('diagramToSvgString', () => {
       .map(Number);
     expect(w).toBeGreaterThan(0);
     expect(h).toBeGreaterThan(0);
+  });
+
+  it('paints a shape with the colour the reader chose for it', async () => {
+    // The inspector has always offered a fill for items and boundaries; until
+    // now neither shape read it, so the picker did nothing at all.
+    const model = sampleModel();
+    const item = model.shapes.find((s) => s.type === 'item')!;
+    const boundary = addBoundary(model, 0, 0, 'outer');
+    item.fill = '#123456';
+    boundary.fill = '#654321';
+    const svg = await diagramToSvgString({ model });
+    expect(svg).toContain('#123456');
+    expect(svg).toContain('#654321');
+  });
+
+  it('falls back to the theme for a fill it cannot paint', async () => {
+    // A fill is free text: it arrives from a template, from generated code, or
+    // from a field someone typed "rojo" into. An unrecognised fill in a
+    // standalone SVG is painted black.
+    const model = sampleModel();
+    const item = model.shapes.find((s) => s.type === 'item')!;
+    item.fill = 'rojo';
+    const svg = await diagramToSvgString({ model });
+    expect(svg).not.toContain('rojo');
+    const rect = svg.match(new RegExp(`<rect[^>]*data-shape-id="${item.id}"[^>]*>`))![0];
+    expect(rect).toContain(`fill="${lightCanvas.itemFill}"`);
+  });
+
+  it('keeps the title legible on a dark custom fill', async () => {
+    const model = sampleModel();
+    const item = model.shapes.find((s) => s.type === 'item')!;
+    item.fill = '#101820';
+    const svg = await diagramToSvgString({ model });
+    // The card the reader darkened gets light text; the untouched card beside
+    // it keeps the theme's own.
+    const legible = readableTextOn('#101820', lightCanvas);
+    expect(legible).not.toBe(lightCanvas.titleText);
+    const card = svg.slice(svg.indexOf(`clip-text-${item.id}`));
+    expect(card.slice(0, card.indexOf('</g>'))).toContain(`fill="${legible}"`);
+    expect(svg).toContain(`fill="${lightCanvas.titleText}"`);
   });
 
   it('clips item text instead of guessing a character count', async () => {

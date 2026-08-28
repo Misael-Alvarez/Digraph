@@ -126,57 +126,74 @@ export interface ColorTokens {
   guide: string;
 }
 
+/**
+ * The light chrome.
+ *
+ * Cooler and flatter than it was: neutrals with a trace of blue in them, so the
+ * grey never reads as warm beside the canvas white, and a single indigo that
+ * only ever means action or state.
+ */
 export const lightColors: ColorTokens = {
-  surface: '#f5f6f7',
+  surface: '#f6f7f9',
   surfaceRaised: '#ffffff',
-  surfaceHover: '#f1f3f4',
-  canvasBackdrop: '#e9eaed',
+  surfaceHover: '#eff1f4',
+  canvasBackdrop: '#e8eaee',
   canvasSheet: '#ffffff',
-  canvasGrid: '#d0d2d5',
-  textPrimary: '#1f1f1f',
-  textSecondary: '#5f6368',
-  textTertiary: '#80868b',
+  canvasGrid: '#d3d7de',
+  textPrimary: '#0f1115',
+  textSecondary: '#545b68',
+  textTertiary: '#838b99',
   textOnAccent: '#ffffff',
-  borderSubtle: '#e8eaed',
-  borderStrong: '#dadce0',
-  accent: '#5b5bf0',
-  accentHover: '#7b6bff',
-  accentSubtle: '#eceafe',
-  danger: '#d93025',
-  dangerSubtle: '#fce8e6',
-  success: '#188038',
-  warning: '#f7941d',
-  selection: '#5b5bf0',
-  guide: '#7c5cff',
+  borderSubtle: '#e6e8ec',
+  borderStrong: '#d5d9e0',
+  accent: '#6918ce',
+  accentHover: '#5713ab',
+  accentSubtle: '#f0e8fd',
+  danger: '#dc2626',
+  dangerSubtle: '#fdeceb',
+  success: '#15803d',
+  warning: '#c2620a',
+  selection: '#6918ce',
+  guide: '#8b3bff',
 };
 
+/**
+ * The dark chrome, and the default one.
+ *
+ * Slate rather than black: a true black makes every panel edge a hard line and
+ * every shadow invisible. The chrome sits back so that the diagram — which is
+ * paper, whatever the chrome is doing (see `canvasTheme`) — is the only lit
+ * thing on the screen.
+ */
 export const darkColors: ColorTokens = {
-  surface: '#12141a',
-  surfaceRaised: '#1a1d26',
-  surfaceHover: '#232733',
-  canvasBackdrop: '#0b0d11',
-  canvasSheet: '#161920',
-  canvasGrid: '#282d3a',
-  textPrimary: '#e8eaed',
-  textSecondary: '#a2a9b5',
-  textTertiary: '#6b7280',
-  // Dark mode's accent is a light violet, so text on it must be dark to clear AA.
-  textOnAccent: '#14132b',
+  surface: '#0f1115',
+  surfaceRaised: '#171a21',
+  surfaceHover: '#202430',
+  canvasBackdrop: '#0a0c10',
+  // The sheet stays paper under dark chrome; the editor never asks for the dark
+  // canvas, and only a share link can.
+  canvasSheet: '#ffffff',
+  canvasGrid: '#d3d7de',
+  textPrimary: '#e7eaf0',
+  textSecondary: '#a6adbb',
+  textTertiary: '#6c7484',
+  // The accent is a light violet, so text on it has to be dark to clear AA.
+  textOnAccent: '#0b0b1f',
   borderSubtle: '#232733',
-  borderStrong: '#333949',
-  accent: '#8b8bff',
-  accentHover: '#a5a0ff',
-  accentSubtle: '#1e1d3d',
-  danger: '#f28b82',
-  dangerSubtle: '#3d2220',
-  success: '#5bb974',
-  warning: '#fbbc4a',
-  selection: '#8b8bff',
-  guide: '#a08bff',
+  borderStrong: '#2e3442',
+  accent: '#9c6bff',
+  accentHover: '#b28cff',
+  accentSubtle: '#221a3c',
+  danger: '#f87171',
+  dangerSubtle: '#3a1d1d',
+  success: '#4ade80',
+  warning: '#fbbf24',
+  selection: '#9c6bff',
+  guide: '#b98bff',
 };
 
 /** Brand colours of each cloud provider. Fixed by the vendors, not themeable. */
-/** The brand gradient, from the logo. */
+/** The brand gradient, from the AION isotype: its purple into its orange. */
 export const brandColors = {
   from: '#2563ff',
   to: '#a855f7',
@@ -188,7 +205,7 @@ export const providerColors = {
   gcp: '#4285f4',
   oci: '#c74634',
   ibm: '#0f62fe',
-  aion: '#6b2fa0',
+  aion: '#6918ce',
   banorte: '#ce0032',
   generic: '#9aa0a6',
 } as const;
@@ -263,7 +280,14 @@ export const darkCanvas: CanvasTheme = {
   shadow: 'rgba(0, 0, 0, 0.5)',
 };
 
-export function canvasTheme(dark: boolean): CanvasTheme {
+/**
+ * The canvas palette.
+ *
+ * Paper by default, whatever the chrome is doing. A drawing tool whose artboard
+ * dims with the interface leaves the reader looking at a grey rectangle; the
+ * dark sheet is still here, but only a share link or an embed asks for it.
+ */
+export function canvasTheme(dark = false): CanvasTheme {
   return dark ? darkCanvas : lightCanvas;
 }
 
@@ -283,6 +307,21 @@ export function contrastRatio(a: string, b: string): number {
   return (hi + 0.05) / (lo + 0.05);
 }
 
+const HEX_COLOUR = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+/**
+ * Whether a stored `fill` is something a renderer can paint with.
+ *
+ * A shape's fill is free text: it arrives from a template, from generated code
+ * or from a field the user types into. An unpaintable value must fall back to
+ * the theme rather than reach the canvas — in a standalone exported SVG an
+ * invalid fill is painted black, which is how a diagram comes back from an
+ * export as a wall of black boxes.
+ */
+export function isColor(value: string | undefined | null): value is string {
+  return typeof value === 'string' && HEX_COLOUR.test(value);
+}
+
 /**
  * Picks legible text for an arbitrary background.
  *
@@ -291,7 +330,7 @@ export function contrastRatio(a: string, b: string): number {
  * the dark theme's near-white title and became invisible.
  */
 export function readableTextOn(background: string, theme: CanvasTheme): string {
-  if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(background)) return theme.titleText;
+  if (!isColor(background)) return theme.titleText;
   return contrastRatio(background, theme.titleText) >= 4.5
     ? theme.titleText
     : luminance(background) > 0.5

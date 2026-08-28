@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SERVICE_ICONS } from '@/data/serviceIcons';
+import { addConnector, addGroup, children, createEmptyModel } from '@/lib/engine';
 import { parseDsl } from '@/lib/dsl';
 import {
   EXPLAIN_SYSTEM_PROMPT,
@@ -75,5 +76,32 @@ describe('explain prompts', () => {
     const prompt = buildExplainPrompt('What is missing?', sample);
     expect(prompt).toContain('```yaml');
     expect(prompt).toContain('What is missing?');
+  });
+
+  it('sends what the graph already worked out, so the model does not have to', () => {
+    // A reviewer reading YAML sometimes misses a cycle and sometimes invents
+    // one; these were found by walking the graph.
+    const model = createEmptyModel();
+    const a = addGroup(model, 0, 0);
+    const b = addGroup(model, 600, 0);
+    const c = addGroup(model, 1200, 0);
+    const itemOf = (group: (typeof model.shapes)[number]) =>
+      children(model, children(model, group.id).find((s) => s.type === 'container')!.id)[0];
+    addConnector(model, itemOf(a).id, itemOf(b).id);
+    addConnector(model, itemOf(b).id, itemOf(c).id);
+    addConnector(model, itemOf(c).id, itemOf(a).id);
+
+    const prompt = buildExplainPrompt('Review this', model);
+    expect(prompt).toContain('Facts computed from the graph');
+    expect(prompt).toContain('cycle');
+    expect(prompt).toContain('score');
+  });
+
+  it('says nothing about an empty diagram rather than inventing a verdict', () => {
+    expect(buildExplainPrompt('Review this', createEmptyModel())).not.toContain('Facts computed');
+  });
+
+  it('tells the model the facts are findings, not opinions', () => {
+    expect(EXPLAIN_SYSTEM_PROMPT).toContain('not opinions');
   });
 });
